@@ -74,7 +74,11 @@ result what you checked and what you skipped, and why.
 3. **Look at the change.** Open the page or editor view the issue is about, at desktop and phone
    widths. Compare with the issue, its design or screenshots. Note layout breaks, cut-off content,
    overflow, wrong colors or spacing, broken interactions, console errors.
-4. **Clean up.** Undo any test data you created, stop servers you started.
+4. **Screenshots.** On the final review pass, save one desktop and one phone screenshot of each
+   changed screen as PNG in the worktree's `.screenshots/` folder (add `.screenshots/` to
+   `.git/info/exclude` so it is never committed). Name them `<screen>-desktop.png`,
+   `<screen>-mobile.png`. Return the paths with a one-line caption each; the runner posts them.
+5. **Clean up.** Undo any test data you created, stop servers you started.
 
 If the app cannot run here (missing secrets, database, services), skip the UI check and say
 exactly what was missing. A skipped UI check is not a failure.
@@ -127,4 +131,5 @@ to decide. It does not cost an extra loop.
 - …
 ```
 
-Leave out empty parts. Never mention cost, tokens or spend in anything posted to GitHub (issues, PRs, comments). When numbers help, use result metrics instead: checks run and their time, fix attempts, review loops, files changed, sub-issues.
+Leave out empty parts. Return the screenshot paths and captions separately, not in this section.
+Never mention cost, tokens or spend in anything posted to GitHub (issues, PRs, comments). When numbers help, use result metrics instead: checks run and their time, fix attempts, review loops, files changed, sub-issues.

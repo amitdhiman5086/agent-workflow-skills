@@ -48,7 +48,10 @@ plain English.
    port no other server uses. Save a named dev-server config that runs in the worktree on that
    port (for example a `.claude/launch.json` entry), so `review-loop` can open the change in a
    browser. Record the port and app host in the routine prompt.
-7. **Routine:** fill in `routines/runner.md`'s prompt with these answers and give it to the user
+7. **Screenshot branch:** ask whether the runner may push UI screenshots to an
+   `agent-screenshots` branch when no logged-in browser is available. The team sees that branch.
+   Record `Screenshot branch: allowed` or `not allowed` (default) in the routine prompt.
+8. **Routine:** fill in `routines/runner.md`'s prompt with these answers and give it to the user
    to paste into the app's scheduled routine (every 15 minutes). If the app lets you create
    routines directly, offer to do that instead.
 
@@ -136,7 +139,25 @@ Run each phase in its own sub-session on that model when the tool supports it.
   the review result, and the marker `<!-- runner -->` (close-out uses it to find the PR). Feedback job: push to the same PR and reply to the command (`<!-- runner -->`) with
   what changed.
 - Request the assignee as reviewer: `gh pr edit <pr> --add-reviewer <owner>`.
+- Post the review's screenshots, if any (see "Screenshots comment").
 - Swap the label `agent-working` → `agent-pr-ready`.
+
+**Screenshots comment** (only when review-loop returned screenshots). Post one new PR comment,
+marker `<!-- runner:screenshots -->`, a short heading, then one `![caption](url)` per image.
+Get the image URLs with the first method that works:
+
+1. **Browser with the owner's GitHub session** (Claude in Chrome or any browser tool that is
+   logged in to GitHub): open the PR, upload the files into the comment box (file upload, not
+   typing), wait until GitHub has replaced every upload placeholder with an image link, copy the
+   generated markdown, then clear the box without submitting. Post the comment with
+   `gh pr comment <pr> --body-file <file>`.
+2. **Screenshot branch**, only when the routine prompt says `Screenshot branch: allowed` (or the
+   owner said yes in this session): commit the files to branch `agent-screenshots` under
+   `pr-<n>/`, never to the PR branch, push, and link
+   `https://github.com/<owner>/<repo>/blob/agent-screenshots/pr-<n>/<file>?raw=true`.
+
+Neither works: post no screenshot comment, and add "Screenshots: not posted (<reason>)" to the
+report.
 
 **Stuck** (checks still failing after 3 fixes, a must-fix review finding still open after 2 loops, a question
 only a human can answer, or a stale job):

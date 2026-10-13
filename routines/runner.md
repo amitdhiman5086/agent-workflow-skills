@@ -23,6 +23,7 @@ Branch prefix: <prefix>/
 Install: <install command>
 Checks, in order: <typecheck command>, <test command>, <lint command>
 UI preview: <dev-server config name>, <app host and port> (leave out when the repo has no UI)
+Screenshot branch: <allowed | not allowed>
 
 Start with the close-out skill for merged or closed agent PRs. Then follow the skill exactly: only issues assigned to the owner where the owner added agent-ready,
 or /agent-… commands from the owner on its PRs; claim with agent-working first; route models
