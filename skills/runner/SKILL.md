@@ -44,7 +44,11 @@ plain English.
 4. **Branch prefix:** ask, defaulting to the user's first name in lowercase (e.g. `amit/`).
 5. **Labels:** list the ones that are missing: `agent-ready`, `agent-working`, `agent-pr-ready`,
    `needs-human`. Ask once before creating them (the team sees them).
-6. **Routine:** fill in `routines/runner.md`'s prompt with these answers and give it to the user
+6. **UI preview:** when the runner builds in a git worktree and the app has a dev server, pick a
+   port no other server uses. Save a named dev-server config that runs in the worktree on that
+   port (for example a `.claude/launch.json` entry), so `review-loop` can open the change in a
+   browser. Record the port and app host in the routine prompt.
+7. **Routine:** fill in `routines/runner.md`'s prompt with these answers and give it to the user
    to paste into the app's scheduled routine (every 15 minutes). If the app lets you create
    routines directly, offer to do that instead.
 

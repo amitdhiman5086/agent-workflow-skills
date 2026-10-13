@@ -24,7 +24,7 @@ The agent asks you questions and does the setup. See [SETUP.md](SETUP.md).
 | 2 | `/size` | `size:S/M/L` + `needs-grooming`; L becomes a parent with up to 6 ordered sub-issues | Automatic after capture | Ready |
 | 3 | `/groom` | Re-checks size and sub-issues, writes Done when / where to look / tests / out of scope / agent hints → `agent-groomed`, or `needs-info` with a question | Routine, hourly, max 5 | Ready |
 | 4 | You | Review, groom further if you want, add `agent-ready` and assign to yourself | By you | — |
-| 5 | `/runner` | `setup` once per repo (base branch, checks, prefix, labels, routine prompt); each run builds ONE job: your `agent-ready` issue or an `/agent-…` command on its PR | Routine, every 15 min | Ready |
+| 5 | `/runner` | `setup` once per repo (base branch, checks, prefix, labels, UI preview, routine prompt); each run builds ONE job: your `agent-ready` issue or an `/agent-…` command on its PR | Routine, every 15 min | Ready |
 | 6 | `/route` | Reads Groom's `Route:` line (size fallback): which model plans, codes, reviews | Called by runner | Ready |
 | 7 | `/review-loop` | Fresh review session: judges what to check (Done when, scope, bugs, rules, leftovers, UI in a browser); every finding goes back to the coder; max 2 loops; result in the PR body | Called by runner | Ready |
 | 8 | `/close-out` | Merged: closes issue + sub-issues (and the parent when all subs are done), deletes the runner's branch, posts a metrics summary. Closed unmerged: `needs-human`, branch kept | Start of every runner run | Ready |

@@ -62,6 +62,15 @@ result what you checked and what you skipped, and why.
    `README`, the project's skills and memory notes, `package.json` scripts (`dev`), `.env` /
    `.env.local` / `.env.example` for host and port (for example `app.localhost:3000`),
    `docker-compose.yml`. Start the dev server if it is not running.
+   - **Run the code under review.** In a git worktree, start the server from that worktree, not
+     the main clone. A server already running from the main clone shows other code. Use a port
+     that clashes with no running server (the runner's setup records one).
+   - **Copied env files keep the old port.** After copying `.env` files into a worktree, change
+     every URL in them that names the main clone's port (app domain, auth callback). Otherwise
+     redirects and login go to the other server.
+   - **Open the host the env names.** Multi-tenant apps route bare `localhost` as a customer site
+     and answer with an error that looks like a bug. Use the app host from the env (for example
+     `app.localhost:<port>`).
 3. **Look at the change.** Open the page or editor view the issue is about, at desktop and phone
    widths. Compare with the issue, its design or screenshots. Note layout breaks, cut-off content,
    overflow, wrong colors or spacing, broken interactions, console errors.
