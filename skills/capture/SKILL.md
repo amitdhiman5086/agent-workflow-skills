@@ -61,6 +61,23 @@ Do not trace root causes or plan a fix. That is `/groom`'s job.
 Show possible matches. If one looks like the same thing, ask: update that issue, or create a
 new one anyway.
 
+Search sub-issues too (`gh api repos/{owner}/{repo}/issues/<n>/sub_issues`). Prefer adding to an
+existing issue over a new one, but only when the idea is the **same scope**. A new area (other
+table, action or page) is a new issue that links the related ones.
+
+A plain comment is not seen by every routine. Runner ignores issue comments, and Groom re-reads
+only `needs-grooming` and `needs-info` issues. Pick the way to add by the issue's label:
+
+| Label on the matching issue | How to add the idea |
+|---|---|
+| none, `captured`, `needs-grooming`, `needs-info` | Comment starting with `<!-- capture:addendum -->`. Set `needs-grooming` if missing. |
+| `agent-groomed`, `agent-ready` | Same comment, then swap the label to `needs-grooming` so Groom folds it into "Done when". Tell the user the issue goes back through review. |
+| `agent-working` (no PR yet) | Runner will not see it. Create a new issue linked to it, or wait for the PR. |
+| `agent-pr-ready`, `needs-human` (open PR) | Comment `/agent-improve <what>` on the PR as the owner. Runner picks it up next run. |
+| closed | New issue that links the closed one. |
+
+Show the comment and any label change, and get a clear yes before posting.
+
 ## 5. Draft
 
 Title: short, specific, under 70 characters, no "[Bug]" prefix.
