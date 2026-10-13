@@ -6,6 +6,16 @@ argument-hint: "[issue number] (empty = everything waiting, max 5)"
 
 # Groom
 
+## Writing rules
+
+Apply to every issue, comment, PR body, review and report this skill writes.
+
+- Write to the point: facts, decisions, next step. No greetings, filler, hedging, recaps or praise.
+- Short sentences. Bullets over paragraphs. One idea per bullet.
+- Leave out empty sections and anything the reader already sees in the issue, diff or labels.
+- Keep exact names: files, labels, commands, error text.
+- Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
+
 Turn sized issues into issues an agent can finish without asking a single question.
 Groom runs unattended (a scheduled routine), so it acts on its own and explains every change in
 a comment. Nobody answers questions during a run.

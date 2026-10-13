@@ -6,6 +6,16 @@ argument-hint: "[PR or issue number] (empty = all of the owner's agent PRs)"
 
 # Close-out
 
+## Writing rules
+
+Apply to every issue, comment, PR body, review and report this skill writes.
+
+- Write to the point: facts, decisions, next step. No greetings, filler, hedging, recaps or praise.
+- Short sentences. Bullets over paragraphs. One idea per bullet.
+- Leave out empty sections and anything the reader already sees in the issue, diff or labels.
+- Keep exact names: files, labels, commands, error text.
+- Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
+
 The last step: once a PR is merged (or closed), tidy up GitHub so the issue list shows the truth.
 
 GitHub access: `gh` when available, otherwise the app's GitHub tools. Write comments in plain

@@ -6,6 +6,16 @@ argument-hint: <issue number>
 
 # Route
 
+## Writing rules
+
+Apply to every issue, comment, PR body, review and report this skill writes.
+
+- Write to the point: facts, decisions, next step. No greetings, filler, hedging, recaps or praise.
+- Short sentences. Bullets over paragraphs. One idea per bullet.
+- Leave out empty sections and anything the reader already sees in the issue, diff or labels.
+- Keep exact names: files, labels, commands, error text.
+- Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
+
 Pick the model for each phase of building an issue. The decision comes from Groom (step 3), and a
 human may have edited it while grooming. Route only reads it and fills gaps.
 

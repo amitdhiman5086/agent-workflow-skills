@@ -6,6 +6,16 @@ argument-hint: <issue number> [base branch]
 
 # Review loop
 
+## Writing rules
+
+Apply to every issue, comment, PR body, review and report this skill writes.
+
+- Write to the point: facts, decisions, next step. No greetings, filler, hedging, recaps or praise.
+- Short sentences. Bullets over paragraphs. One idea per bullet.
+- Leave out empty sections and anything the reader already sees in the issue, diff or labels.
+- Keep exact names: files, labels, commands, error text.
+- Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
+
 A second pair of eyes before the PR goes out. The reviewer is a **fresh session**: it never sees
 the coding conversation, only the issue, the change and the check results. It reads and runs
 things; it never edits code.
