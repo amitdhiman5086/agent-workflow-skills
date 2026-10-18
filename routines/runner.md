@@ -17,13 +17,7 @@ creates their own runner routine. `/runner setup` fills in this prompt for you.
 ```
 Run the runner skill on this repository: take ONE job and finish it.
 
-Owner: <github-login>
-Base branch: <branch> (an issue's "Base:" line overrides it)
-Branch prefix: <prefix>/
-Install: <install command>
-Checks, in order: <typecheck command>, <test command>, <lint command>
-UI preview: <dev-server config name>, <app host and port> (leave out when the repo has no UI)
-Screenshot branch: <allowed | not allowed>
+Settings and labels: ~/.config/agent-workflow/<owner>/<repo>.md
 
 Start with the close-out skill for merged or closed agent PRs. Then follow the skill exactly: only issues assigned to the owner where the owner added agent-ready,
 or /agent-… commands from the owner on its PRs; claim with agent-working first; route models
@@ -34,8 +28,9 @@ needs-human. End with the one-line report.
 
 ## Before the first run
 
-- The skills must reach the routine through a shared place (team plugin or the repo's
-  `.claude/skills/`); a cloud routine cannot see `~/.claude/skills` on your laptop.
-- The cloud environment needs the repo's dependencies installed, and any secrets the checks
-  need (for example `.env` values) set as environment variables in the app, never in the repo.
+- A local routine (runs on your computer) reads the skills and the settings file where they are.
+- A cloud routine cannot see your computer. Put the skills in a shared place (team plugin or the
+  repo's `.claude/skills/`) and paste the settings file's content into the prompt in place of its
+  path. Its environment needs the repo's dependencies installed, and any secrets the checks need
+  (for example `.env` values) set as environment variables in the app, never in the repo.
 - Try one issue by hand first: `/runner <number>`.

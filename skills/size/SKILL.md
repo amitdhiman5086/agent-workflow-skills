@@ -16,6 +16,17 @@ Apply to every issue, comment, PR body, review and report this skill writes.
 - Keep exact names: files, labels, commands, error text.
 - Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
 
+## Labels
+
+Label names in this skill are roles. The repo may use its own label for a role.
+- Read the `## Labels` section of the local settings file
+  `~/.config/agent-workflow/<owner>/<repo>.md` (`<owner>/<repo>` from
+  `gh repo view --json nameWithOwner`).
+- Use the repo's label for each role everywhere: `gh` commands, searches and comments. A role
+  missing from the file uses its role name.
+- No file yet: never create a label, since one with the same meaning may exist. Run the label
+  matching in the `workflow-setup` skill (Phase 4) first.
+
 Rate an issue S, M or L, and split L issues into sub-issues. This skill runs **without asking**:
 it labels and creates sub-issues on its own, then reports what it did. The guardrails below keep
 that safe.
@@ -56,7 +67,7 @@ requirements that are still unclear. When effort and file count disagree, use th
 
 ## 3. Label
 
-Make sure the labels exist in the repo. Create any that are missing, once:
+Make sure each role's label exists in the repo (see Labels). Create any that are missing, once:
 
 ```
 gh label create needs-grooming --color bfd4f2 --description "Sized, waiting for the Groom routine"
