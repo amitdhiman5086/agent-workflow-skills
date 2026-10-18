@@ -12,8 +12,12 @@ If the `workflow-setup` skill is already installed, you can also run `/workflow-
 project.
 
 It takes about 10 minutes and covers: tools, your role and repos, installing the skills, GitHub
-labels, runner settings, models, secrets for the cloud, the two routines, and an optional test
-run. You can run it again any time; it only fills what is missing.
+labels (it reuses labels your repo already has with the same meaning), runner settings, models,
+secrets for the cloud, the two routines, and an optional test run. You can run it again any time;
+it only fills what is missing.
+
+Your label mapping and runner settings are saved on your computer, one file per repo:
+`~/.config/agent-workflow/<owner>/<repo>.md`. Nothing is committed to the project.
 
 ## For agents
 
