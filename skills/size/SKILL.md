@@ -93,7 +93,14 @@ Only for L. Plan the pieces first, then check the rules, then create.
 **Rules for each sub-issue**
 - S or M on its own. If a piece is still L, split it further.
 - Mergeable alone: the app builds and tests pass after it, in order.
-- Ordered by dependency: data and schema → server → UI → previews, assets and docs.
+- **Vertical slices.** Each sub-issue delivers one thin piece that works end to end (data,
+  server and UI together, as far as that piece needs) and can be shown or checked on its own.
+  Never one sub-issue per layer.
+- Order: a preparing refactor first, then by dependency; among independent pieces, the riskiest
+  first.
+- A wide mechanical change (a rename or retype across many files) is the exception: first add
+  the new form beside the old, then move callers over in batches (one sub-issue each), then
+  delete the old form.
 - Tests belong with the code they test. No separate "write tests" or "cleanup" sub-issue.
 - **At most 6.** If the work needs more, do not create any. Keep the issue as `size:L`, and
   comment that it should become two or more parent issues, with your suggested grouping.
