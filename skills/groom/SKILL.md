@@ -55,7 +55,8 @@ Without one, in the current repo, collect:
 1. Open issues labelled `needs-grooming`.
 2. Open issues labelled `needs-info` whose newest comment is newer than Groom's question
    comment (marked `<!-- groom:question -->`) and is not from Groom. Treat them as
-   `needs-grooming` again.
+   `needs-grooming` again. A reply of `yes` accepts every recommendation in the question
+   comment; `Q2: b` picks an option.
 
 ```
 gh issue list --label needs-grooming --state open --json number,title,createdAt --limit 50
@@ -74,15 +75,27 @@ open PR linked to it.
   and its sub-issues (`.../sub_issues`).
 - Read the repo's `CLAUDE.md` and the docs and skills it points to.
 - Read the code for real: the files involved, similar existing features to copy, tests nearby.
+- The issue's "Agreed" section (from `/capture`) holds settled decisions. Never ask them again.
+- **Already built?** Search the code for the behavior by what it does, not only by the issue's
+  words. If it exists, ask (step 3) whether to close the issue, and say where it lives.
+- **A bug?** Confirm it first: reproduce it with a test or a short script when that is cheap,
+  otherwise walk the code path step by step. Write the result under "Where to look"
+  (`Reproduced: …` or `Code path: …`). If you cannot confirm it and the steps are missing, ask
+  (step 3).
 
-## 3. Is a human decision needed?
+## 3. Decide, or ask
 
-Stop only for things the code cannot answer and a wrong guess would waste the work: a product
-choice, missing design or copy, conflicting requirements, access the agent will not have.
+Decide technical questions yourself, from the code, existing patterns, the project rules and the
+"Agreed" section. Write each decision into the groomed section ("Where to look", "Risks"), so a
+human can see it and change it.
+
+Ask only when the code cannot answer and a wrong guess would waste the work: a product choice,
+missing design or copy, conflicting requirements, access the agent will not have.
 
 Then:
-- Post one comment that starts with `<!-- groom:question -->`: the decision needed, why, and
-  2–3 concrete options with your recommendation. Mention the issue author.
+- Post one comment that starts with `<!-- groom:question -->` and mentions the issue author. Use
+  the `grill-me` format: numbered questions, each with its options and your recommended answer.
+  End with: "Reply `yes` to accept all recommendations, or answer per question (`Q2: b`)."
 - Swap the label `needs-grooming` → `needs-info`. Change nothing else. Move on.
 
 Do **not** stop for things you can find in the code or decide from existing patterns.
@@ -101,8 +114,8 @@ One size up for a database migration, tenant-scoped data access, or unclear requ
 
 You may change freely, as long as no issue involved is `agent-ready` or later:
 - Fix the `size:*` label.
-- Split an issue that is really L into sub-issues (each S or M, mergeable alone, ordered
-  data → server → UI → assets, tests with their code, at most 6).
+- Split an issue that is really L into sub-issues (each S or M, mergeable alone, vertical
+  slices ordered as in `/size`, tests with their code, at most 6).
 - Edit, add, reorder or merge sub-issues. Close a wrong sub-issue with
   `gh issue close <n> --reason "not planned"` and a comment saying where its work went.
 - Fold an over-split parent back into one issue.
@@ -134,15 +147,15 @@ Otherwise write: "No new tests. Verify by: <steps in the browser or app>."
 - What must not change.
 
 ## Agent hints
-- Route: plan <none|sonnet|opus> · code <sonnet|opus> · review <sonnet|opus>
+- Route: plan <none|opus> · code <sonnet|opus> · review <sonnet|opus>
 - Base: <branch>   (only when it should not use the repo's usual base branch)
 - Risks: anything the agent must be careful with, and the project rules that apply.
 <!-- groom:end -->
 ```
 
 Choosing the Route line (the runner follows it exactly):
-- `plan`: `none` for a clear S; `sonnet` for M; `opus` for L, parents with sub-issues, or tricky
-  logic, migrations and tenant-scoped data.
+- `plan`: `none` for a clear S; `opus` for everything else. The plan runs on Opus at xhigh
+  effort (see the `incremental-build` skill).
 - `code`: `sonnet` by default; `opus` only when the coding itself needs deep reasoning.
 - `review`: `sonnet` by default; `opus` for security, tenancy or data-loss risk.
 
