@@ -1,6 +1,6 @@
 ---
 name: incremental-build
-description: Build a change in thin, verified slices. First a deep plan in its own sub-session on the strongest model (Opus, xhigh effort) that splits the work into vertical slices, riskiest first. Then for each slice: write the named failing test first, build, run typecheck and the related tests, commit, and only then start the next. Keeps comments rare and lists what it noticed but did not change. Used by the runner for its plan and code phases; also by hand. Use for /incremental-build <issue or task>, "build this step by step", "small commits".
+description: Build a change in thin, verified slices. First a deep plan in its own sub-session on the strongest model (Opus, xhigh effort) that splits the work into vertical slices, riskiest first. Then, for each slice, write the named failing test first, build, run typecheck and the related tests, and commit before starting the next. Keeps comments rare and lists what it noticed but did not change. Used by the runner for its plan and code phases; also by hand. Use for /incremental-build <issue or task>, "build this step by step", "small commits".
 argument-hint: <issue number or task>
 ---
 
