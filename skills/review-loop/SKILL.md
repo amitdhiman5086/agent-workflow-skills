@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: Review an agent's change in fresh, separate sessions before the PR opens. A Spec reviewer (Done when, scope, bugs) and a Standards reviewer (project rules, leftovers, code smells) run in parallel, each judging which checks matter, plus the UI in a real browser when the change is visual. Findings rest on what the reviewer ran or read, never on the coder's word. Sends every finding back to the coder, and stop after at most 2 fix loops. Writes a "Code review" section for the PR body; never posts inline comments. Called by the runner after the checks pass. Use for /review-loop <issue>, "review this change".
+description: Review an agent's change in fresh, separate sessions before the PR opens. A Spec reviewer (Done when, scope, bugs) and a Standards reviewer (project rules, leftovers, code smells) run in parallel, each judging which checks matter, plus the UI in a real browser when the change is visual. Findings rest on what the reviewer ran or read, never on the coder's word. Sends every finding back to the coder and stops after at most 2 fix loops. Writes a "Code review" section for the PR body; never posts inline comments. Called by the runner after the checks pass. Use for /review-loop <issue>, "review this change".
 argument-hint: <issue number> [base branch]
 ---
 
