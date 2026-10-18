@@ -20,14 +20,24 @@ The agent asks you questions and does the setup. See [SETUP.md](SETUP.md).
 
 | Step | Skill | What it does | Runs | Status |
 |---|---|---|---|---|
-| 1 | `/capture` | Idea, screenshots, links or notes → issue(s) labelled `captured`, then runs `/size` | By you | Ready |
-| 2 | `/size` | `size:S/M/L` + `needs-grooming`; L becomes a parent with up to 6 ordered sub-issues | Automatic after capture | Ready |
-| 3 | `/groom` | Re-checks size and sub-issues, writes Done when / where to look / tests / out of scope / agent hints → `agent-groomed`, or `needs-info` with a question | Routine, hourly, max 5 | Ready |
+| 1 | `/capture` | Idea, screenshots, links or notes → agrees on each with you in `grill-me` rounds → issue(s) labelled `captured`, then runs `/size` | By you | Ready |
+| 2 | `/size` | `size:S/M/L` + `needs-grooming`; L becomes a parent with up to 6 ordered sub-issues, each a vertical slice | Automatic after capture | Ready |
+| 3 | `/groom` | Checks it is not already built and confirms bugs, re-checks size and sub-issues, decides technical questions itself, writes Done when / where to look / tests / out of scope / agent hints → `agent-groomed`, or `needs-info` with numbered questions only for real decisions | Routine, hourly, max 5 | Ready |
 | 4 | You | Review, groom further if you want, add `agent-ready` and assign to yourself | By you | — |
-| 5 | `/runner` | `setup` once per repo (base branch, checks, prefix, labels, UI preview, saved in your local file) and writes the routine prompt; each run builds ONE job: your `agent-ready` issue or an `/agent-…` command on its PR | Routine, every 15 min | Ready |
-| 6 | `/route` | Reads Groom's `Route:` line (size fallback): which model plans, codes, reviews | Called by runner | Ready |
-| 7 | `/review-loop` | Fresh review session: judges what to check (Done when, scope, bugs, rules, leftovers, UI in a browser); every finding goes back to the coder; max 2 loops; result in the PR body | Called by runner | Ready |
+| 5 | `/runner` | `setup` once per repo (base branch, checks, prefix, labels, UI preview, saved in your local file) and writes the routine prompt; each run builds ONE job (your `agent-ready` issue or an `/agent-…` command on its PR) with `/incremental-build`, then `/deslop`, then `/review-loop` | Routine, every 15 min | Ready |
+| 6 | `/route` | Reads Groom's `Route:` line (size fallback): plan `none` or Opus at xhigh effort, and which model codes and reviews | Called by runner | Ready |
+| 7 | `/review-loop` | Two fresh reviewers in parallel: Spec (Done when, scope, bugs) and Standards (rules, leftovers, smells), plus the UI in a browser; findings rest on what they ran or read; every finding goes back to the coder; max 2 loops; result in the PR body | Called by runner | Ready |
 | 8 | `/close-out` | Merged: closes issue + sub-issues (and the parent when all subs are done), deletes the runner's branch, posts a metrics summary. Closed unmerged: `needs-human`, branch kept | Start of every runner run | Ready |
+
+### Helper skills
+
+Called by the steps above, and useful on their own.
+
+| Skill | What it does | Used by |
+|---|---|---|
+| `/grill-me` | Rounds of numbered questions, each with a recommended answer that "yes" accepts, until you agree on a plan | `/capture`; `/groom`'s question format |
+| `/incremental-build` | Deep plan on Opus at xhigh effort as vertical slices, then one slice at a time: failing test first, build, check, commit | Runner |
+| `/deslop` | Removes comments that repeat the code, debug code and other clutter from a change; behavior unchanged | Runner, before review |
 
 ## Labels
 
@@ -64,6 +74,9 @@ ln -s "$PWD/skills/route" ~/.claude/skills/route
 ln -s "$PWD/skills/runner" ~/.claude/skills/runner
 ln -s "$PWD/skills/review-loop" ~/.claude/skills/review-loop
 ln -s "$PWD/skills/close-out" ~/.claude/skills/close-out
+ln -s "$PWD/skills/grill-me" ~/.claude/skills/grill-me
+ln -s "$PWD/skills/incremental-build" ~/.claude/skills/incremental-build
+ln -s "$PWD/skills/deslop" ~/.claude/skills/deslop
 ln -s "$PWD/skills/workflow-setup" ~/.claude/skills/workflow-setup
 ```
 
@@ -71,3 +84,14 @@ Or copy `skills/*` into a project's `.claude/skills/` to share them with everyon
 Routines (scheduled runs in the app) are described in `routines/`.
 
 Needs: `gh` logged in (`gh auth status`), or the app's GitHub connector.
+
+## Credits
+
+Some skills borrow ideas from these MIT-licensed collections:
+- [Matt Pocock's skills](https://github.com/mattpocock/skills): `grill-me`, `grilling`,
+  `to-tickets`, `triage`, `tdd`, `code-review`.
+- [Addy Osmani's agent-skills](https://github.com/addyosmani/agent-skills):
+  `incremental-implementation`.
+- [pstack](https://github.com/cursor/plugins/tree/main/pstack) by Lauren Tan (Claude port by
+  Michael Denyer): `deslop`, `no-comments`, `principle-sequence-verifiable-units`,
+  `principle-prove-it-works`.

@@ -1,6 +1,6 @@
 ---
 name: workflow-setup
-description: Guided, question-by-question setup of the team's issue-to-PR workflow (capture, size, groom, route, runner, review-loop, close-out) for one person and one or more repos. Checks tools, installs the skills, reuses the repo's existing labels or creates missing ones, configures the runner, explains secrets, creates or prints the routines, and offers a test run. Safe to re-run; it only fills gaps. Use for /workflow-setup, "set up the workflow", "install the workflow skills", "onboard me to the agent workflow".
+description: Guided, question-by-question setup of the team's issue-to-PR workflow (capture, size, groom, route, runner, review-loop, close-out, plus grill-me, incremental-build and deslop) for one person and one or more repos. Checks tools, installs the skills, reuses the repo's existing labels or creates missing ones, configures the runner, explains secrets, creates or prints the routines, and offers a test run. Safe to re-run; it only fills gaps. Use for /workflow-setup, "set up the workflow", "install the workflow skills", "onboard me to the agent workflow".
 ---
 
 # Workflow setup
@@ -92,8 +92,8 @@ Ask where:
 | Personal, copied | Same place, copies. No automatic updates |
 | In the repo | Copy into `<repo>/.claude/skills/` so everyone in the repo gets them and cloud routines can see them. This changes a shared repo: confirm, then do it on a branch with a PR |
 
-Install `capture`, `size`, `groom` for everyone; add `route`, `runner`, `review-loop`,
-`close-out` for the "full" role. Skip any that already exist, and say which.
+Install `capture`, `size`, `groom`, `grill-me` for everyone; add `route`, `runner`,
+`incremental-build`, `deslop`, `review-loop`, `close-out` for the "full" role. Skip any that already exist, and say which.
 
 ```bash
 ln -s "<workflow>/skills/<name>" ~/.claude/skills/<name>
@@ -168,7 +168,8 @@ Show the defaults and ask if they want changes:
 |---|---|
 | Groom routine | Opus 5.5, high effort |
 | Runner routine (orchestrates) | Sonnet 5.5, high effort |
-| Plan / code / review | Chosen per issue by Groom's `Route:` line (route skill has the fallback table) |
+| Plan | Opus 5.5, xhigh effort, or no plan for a clear S (Groom's `Route:` line) |
+| Code / review | Chosen per issue by Groom's `Route:` line (route skill has the fallback table) |
 
 In another tool, map to its strongest reasoning model and its standard coding model.
 

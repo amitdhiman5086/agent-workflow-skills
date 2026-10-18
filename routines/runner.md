@@ -10,7 +10,7 @@ creates their own runner routine. `/runner setup` fills in this prompt for you.
 | Schedule | Every 15 minutes |
 | Model | Claude Sonnet 5.5, high effort (it orchestrates; `route` picks the models per phase) |
 | Repository | e.g. `your-org/your-repo` |
-| Needs | The `runner`, `route`, `review-loop` and `close-out` skills; GitHub access that can push branches, open PRs, edit labels and comment; Node and the repo's install command in the environment |
+| Needs | The `runner`, `route`, `incremental-build`, `deslop`, `review-loop` and `close-out` skills; GitHub access that can push branches, open PRs, edit labels and comment; Node and the repo's install command in the environment |
 
 ## Prompt
 

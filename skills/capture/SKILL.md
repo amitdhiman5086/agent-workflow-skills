@@ -1,6 +1,6 @@
 ---
 name: capture
-description: Turn a rough idea, screenshots, links or meeting notes into well-formed GitHub issue drafts for the current repo, check for duplicates, and create them after confirmation with the `captured` label. First step of the team workflow (capture → size → groom → agent). Use for /capture, "capture this", "log this idea", "turn these notes into issues".
+description: Turn a rough idea, screenshots, links or meeting notes into well-formed GitHub issue drafts for the current repo, agree on each one with the user in grill-me question rounds, check for duplicates, and create them after confirmation with the `captured` label. First step of the team workflow (capture → size → groom → agent). Use for /capture, "capture this", "log this idea", "turn these notes into issues".
 argument-hint: <idea, notes, or links>
 ---
 
@@ -53,8 +53,7 @@ Accept any mix of:
 - **Meeting notes / long text** — find each separate idea. List them as one short line each and
   let the user pick which become issues. One idea = one issue.
 
-If something that changes the issue is unclear (which page, what is wrong, who is affected),
-ask **at most 3 short questions** in one message. Do not ask what you can find in the code.
+Questions come in step 4, after the code check, so they can use what the code shows.
 
 ## 3. Light code check
 
@@ -65,7 +64,25 @@ For each idea, spend a few searches only:
 
 Do not trace root causes or plan a fix. That is `/groom`'s job.
 
-## 4. Check for duplicates
+## 4. Agree on it
+
+Reach a shared understanding with the user before drafting, so `/groom` rarely has to ask.
+Follow the `grill-me` skill: rounds of numbered questions, each with a recommended answer that
+"yes" accepts. Keep asking until nothing is open; there is no question limit. A small, clear idea
+may need no round at all.
+
+Ask about the product, for each idea:
+- What exactly is wanted or wrong, and where (page, screen, flow).
+- Who it affects, and why it matters now.
+- What "done" looks like, roughly: what someone sees or can do afterwards.
+- What is out of scope.
+- Design, copy or data that must be decided or supplied.
+- Priority or deadline, when it changes the work.
+
+Do not ask how to build it; `/groom` decides that. Do not ask what the code or the issue tracker
+can tell you; look it up.
+
+## 5. Check for duplicates
 
 `gh issue list --state open --search "<key words>" --json number,title --limit 10`
 
@@ -89,7 +106,7 @@ only `needs-grooming` and `needs-info` issues. Pick the way to add by the issue'
 
 Show the comment and any label change, and get a clear yes before posting.
 
-## 5. Draft
+## 6. Draft
 
 Title: short, specific, under 70 characters, no "[Bug]" prefix.
 
@@ -105,14 +122,17 @@ Who it affects and why it matters.
 - What the screenshots or links show.
 - Main files or pages involved (`path/to/file.ts`), if found.
 
+## Agreed
+- Decisions from step 4: scope, rough "done", out of scope, design or copy.
+
 ## Open questions
-- Anything still unknown, for /groom to resolve. Leave out if none.
+- Only what the user chose to leave for /groom. Leave out if none.
 ```
 
 Rules: plain language, no filler, no secrets or `.env` values, no customer data.
 Never mention cost, tokens or spend in anything posted to GitHub (issues, PRs, comments). When numbers help, use result metrics instead: checks run and their time, fix attempts, review loops, files changed, sub-issues.
 
-## 6. Confirm, then create
+## 7. Confirm, then create
 
 Show every draft (title + body). Ask **"Create these issues?"** and wait for a clear yes.
 Creating issues is visible to the whole team. Apply any edits first.
@@ -127,12 +147,12 @@ Then for each draft, write the body to a temp file and run:
 gh issue create --title "<title>" --body-file <file> --label captured
 ```
 
-## 7. Size them
+## 8. Size them
 
 Right away, run the `size` skill on every issue you just created. It labels each issue and
 splits large ones into sub-issues without asking.
 
-## 8. Report
+## 9. Report
 
 One line per issue: number, title, link, and the size `/size` gave it. Remind the user to attach
 any screenshots by hand. Next, the Groom routine picks them up (label `needs-grooming`).

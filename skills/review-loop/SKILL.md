@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: Review an agent's change in a fresh, separate session before the PR opens, judge which checks matter (Done when, scope, bugs, project rules, leftovers, and the UI in a real browser when the change is visual), send every finding back to the coder, and stop after at most 2 fix loops. Writes a "Code review" section for the PR body; never posts inline comments. Called by the runner after the checks pass. Use for /review-loop <issue>, "review this change".
+description: Review an agent's change in fresh, separate sessions before the PR opens. A Spec reviewer (Done when, scope, bugs) and a Standards reviewer (project rules, leftovers, code smells) run in parallel, each judging which checks matter, plus the UI in a real browser when the change is visual. Findings rest on what the reviewer ran or read, never on the coder's word. Sends every finding back to the coder and stops after at most 2 fix loops. Writes a "Code review" section for the PR body; never posts inline comments. Called by the runner after the checks pass. Use for /review-loop <issue>, "review this change".
 argument-hint: <issue number> [base branch]
 ---
 
@@ -16,9 +16,11 @@ Apply to every issue, comment, PR body, review and report this skill writes.
 - Keep exact names: files, labels, commands, error text.
 - Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
 
-A second pair of eyes before the PR goes out. The reviewer is a **fresh session**: it never sees
-the coding conversation, only the issue, the change and the check results. It reads and runs
+A second pair of eyes before the PR goes out. Each reviewer is a **fresh session**: it never
+sees the coding conversation, only the issue, the change and the check results. It reads and runs
 things; it never edits code.
+
+Based in part on Matt Pocock's `code-review` and pstack's `principle-prove-it-works` (MIT).
 
 Model: the `review` choice from the `route` skill (default Sonnet 5.5, high effort).
 
@@ -41,17 +43,46 @@ review ─ no findings ───────────────────
 - The check results the runner already has.
 - The repo's `CLAUDE.md`, and the docs and skills it points to.
 
-## 2. Decide what to check
+## 2. Two reviewers, in parallel
 
-Use judgement. Check what can go wrong in **this** change, and skip what cannot. Say in the
-result what you checked and what you skipped, and why.
+Start two fresh review sub-sessions at the same time, on the route's `review` model. Give each the
+diff and the issue; give the Standards reviewer the rule files and the smell list too. Keep their
+findings in separate lists. Never merge or re-rank them: a change can pass one and fail the other.
 
-| Check | When |
-|---|---|
-| **Done when + scope** | Always. Every item met; nothing outside the issue changed |
-| **Bugs + edge cases** | Any logic, data or state change. Empty input, errors, permissions, regressions in touched code |
-| **Project rules + leftovers** | Always. `CLAUDE.md` rules (tenancy, test placement, styling conventions), temp files, debug code, commented-out code, tests added only where the issue's "Tests" section asks |
-| **UI in a browser** | Only when the change is visible: components, styles, pages, blocks, images. Skip for server-only or config changes |
+Each reviewer uses judgement: check what can go wrong in **this** change, skip what cannot, and
+say what was checked and skipped, and why.
+
+**Spec reviewer: does the change do what the issue asks?**
+- Every "Done when" item is met. Quote the item in each finding.
+- Missing or partial items; behavior nobody asked for (scope creep); items that look done but
+  work wrong.
+- Bugs and edge cases in changed logic, data or state: empty input, errors, permissions,
+  regressions in touched code.
+
+**Standards reviewer: does the change follow this repo's rules?**
+- `CLAUDE.md` and every doc that says how code is written (`CONTRIBUTING.md`,
+  `CODING_STANDARDS.md`, the docs `CLAUDE.md` points to): tenancy, test placement, styling. Cite
+  the rule in each finding.
+- Leftovers: temp files, debug code, commented-out code, comments that repeat the code, tests
+  beyond what the issue's "Tests" section asks.
+- Code smells, as judgement calls: always `minor`, and a documented repo rule wins over them.
+  - Mysterious name: the name does not say what it does or holds.
+  - Duplicated code: the same logic in two places in the change.
+  - Feature envy: a function that mostly uses another module's data.
+  - Data clumps: the same few values always passed together.
+  - Primitive obsession: a plain string or number standing in for a domain idea.
+  - Repeated switches: the same `switch` or `if` chain on the same value in several places.
+  - Shotgun surgery: one logical change spread across many files.
+  - Speculative generality: options, hooks or abstractions the issue does not need.
+  - Middle man: a function or class that only passes calls on.
+  - Message chains: long `a.b().c().d()` walks the caller should not depend on.
+
+**UI in a browser** (step 3): the main review session does it once, only when the change is
+visible (components, styles, pages, blocks, images). Skip it for server-only or config changes.
+
+**Prove it.** Base every finding and every pass on something you ran or read: the code at
+`file:line`, a test or command you ran, the page you opened. Never on the coder's summary or a
+check you did not see. For a failure, quote the output that shows it, not only "test fails".
 
 ## 3. UI check in a browser
 
@@ -88,16 +119,16 @@ exactly what was missing. A skipped UI check is not a failure.
 Every finding sends the change back for a fix, as long as loops remain. Write each one as:
 
 ```
-- [must-fix | minor] `path/file.ts:42` What is wrong. What to do.
+- [must-fix | minor] [Spec | Standards] `path/file.ts:42` What is wrong. What to do.
 ```
 
 `must-fix`: bugs, missed "Done when" items, broken project rules, out-of-scope changes, a visible
-UI defect. `minor`: naming, readability, small style points.
+UI defect. `minor`: naming, readability, small style points, code smells.
 
 ## 5. Fix round
 
-Give all findings to the coder (the coding session, not the reviewer). The coder fixes each one,
-or explains why not. The runner re-runs the checks. Then review again.
+Give all findings to the coder (the coding session, not the reviewers). The coder fixes each
+one, or explains why not. The runner re-runs the checks. Then both reviewers review again.
 
 **Disagreement:** when the coder explains instead of fixing, re-check with that reason. Accept
 it, or keep the finding. A finding still disputed goes into the PR as **Disputed** for the human
@@ -116,13 +147,13 @@ to decide. It does not cost an extra loop.
 ```markdown
 ## Code review
 **Result:** Passed in 1 pass | Passed after 2 loops | Stuck after 2 loops
-**Reviewer:** Sonnet 5.5, high effort, fresh session
+**Reviewers:** Spec and Standards, <model>, <effort>, fresh sessions
 
-**Checked:** Done when, scope, bugs, project rules, UI at app.localhost:3000/… (desktop, phone)
+**Checked:** Spec (Done when, scope, bugs), Standards (project rules, leftovers, smells), UI at app.localhost:3000/… (desktop, phone)
 **Skipped:** <check>: <why>
 
 **Fixed during review**
-- `file:line` what was wrong → what changed
+- [Spec | Standards] `file:line` what was wrong → what changed
 
 **Disputed** (your call)
 - finding, coder's reason, reviewer's view
