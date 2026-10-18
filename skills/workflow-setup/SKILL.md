@@ -123,24 +123,28 @@ for the same thing.
 1. **Read what exists.** The local file's `## Labels` section, if any: keep each row whose label
    still exists and match the rest again. Then list the repo's labels:
    `gh label list --limit 300 --json name,description`.
-2. **Match each role.** The first rule that finds a label wins:
-   1. Its description contains `[workflow: <role>]`: a teammate already mapped it.
-   2. Its name is exactly the role.
-   3. It means the same: the same name after lowercasing and ignoring `:` `-` `_` `/` `.` and
-      spaces, with `need` = `needs` and `groom` = `grooming` = `groomed` (`need:grooming`,
-      `Needs Grooming` and `agent-grooming-needed` all match `needs-grooming`); a synonym
-      (`size/small` or `effort: S` for `size:S`); or a description that says the same thing.
+2. **Match each role.** A label matches when:
+   - its description contains `[workflow: <role>]` (a teammate already mapped it), or
+   - its name is exactly the role, or
+   - it means the same: the same name after lowercasing and ignoring `:` `-` `_` `/` `.` and
+     spaces, with `need` = `needs` and `groom` = `grooming` = `groomed` (`need:grooming`,
+     `Needs Grooming` and `agent-grooming-needed` all match `needs-grooming`); a synonym
+     (`size/small` or `effort: S` for `size:S`); or a description that says the same thing.
+
+   When several labels match one role (for example `need:grooming` and an unused
+   `needs-grooming` from an earlier setup), pick a tagged label first, then the one used on the
+   most issues, then the exact name. Count use with
+   `gh issue list --label "<label>" --state all --limit 500 --json number --jq length`.
 
    `agent-ready`, `agent-working` and `agent-pr-ready` start or track the agent's own work. Match
    them only to a label whose name contains `agent`, `bot` or `ai`, never to a general one such
    as `ready` or `in-progress`: the runner would act on people's own issues.
-3. **Show one table and ask once.** Count open issues per matched label with
-   `gh issue list --label "<label>" --state open --json number --jq length`.
+3. **Show one table and ask once.** List the other matches too, so the user can switch.
 
-   | Role | Label | Why | Open issues |
-   |---|---|---|---|
-   | `needs-grooming` | `need:grooming` | same meaning | 12 |
-   | `agent-ready` | `agent-ready` (new) | no match | – |
+   | Role | Label | Why | Issues | Other matches |
+   |---|---|---|---|---|
+   | `needs-grooming` | `need:grooming` | same meaning, most used | 12 | `needs-grooming` (0) |
+   | `agent-working` | `agent-working` (new) | no match | – | – |
 
    Say what a yes does: which labels get created and which descriptions get tagged. The user may
    change any row.
