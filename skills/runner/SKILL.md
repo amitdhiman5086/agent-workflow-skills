@@ -1,6 +1,6 @@
 ---
 name: runner
-description: Build agent-ready GitHub issues into PRs. "setup" asks once per repo for the base branch, checks and branch prefix, reuses or creates the labels, saves the settings in a local file and writes the routine prompt. A run (scheduled every 15 minutes in the app) takes ONE job, either a new issue labelled agent-ready by its own assignee or an /agent-… command on one of its PRs, routes models with the route skill, plans, codes, runs the checks, runs the review-loop skill, opens the PR and requests the assignee's review. Use for /runner setup, /runner, /runner <issue>.
+description: Build agent-ready GitHub issues into PRs. "setup" asks once per repo for the base branch, checks and branch prefix, reuses or creates the labels, saves the settings in a local file and writes the routine prompt. A run (scheduled every 15 minutes in the app) takes ONE job, either a new issue labelled agent-ready by its own assignee or an /agent-… command on one of its PRs, routes models with the route skill, builds it in small committed slices with the incremental-build skill, runs the checks, cleans the diff with the deslop skill, runs the review-loop skill, opens the PR and requests the assignee's review. Use for /runner setup, /runner, /runner <issue>.
 argument-hint: "setup | [issue number]"
 ---
 
@@ -134,30 +134,35 @@ Run each phase in its own sub-session on that model when the tool supports it.
 
 ### 5. Plan and code
 
-- **Plan** (unless the route says `none`): the planning sub-session reads the issue's groomed
-  section and the code, and writes a short plan: files, order, risks. No code changes.
-- **Code**: the coding sub-session follows the plan and the issue's "Done when", the repo's
-  `CLAUDE.md`, and adds tests only where the issue's "Tests" section asks for them. It deletes
-  any temporary files it made.
-- **Parent with sub-issues**: build the sub-issues in order on one branch. After each one, run
-  the checks and make one commit for it, then continue.
-- **Feedback job**: the coder changes only what the commands ask for.
+Run the `incremental-build` skill with the issue, the route and the checks from the settings:
+- **Plan** (unless the route says `none`): its own sub-session on Opus at xhigh effort splits the
+  work into vertical slices. No code changes.
+- **Code**: on the route's `code` model, one slice at a time: the named failing test first,
+  then the code, typecheck and the related tests, one commit per slice. Tests only where the
+  issue's "Tests" section asks for them.
+- **Parent with sub-issues**: one plan, sub-issues built in order on one branch, the full checks
+  after each sub-issue.
+- **Feedback job**: plan and build only what the commands ask for.
 
-### 6. Checks, then review
+It returns a build report and a "Noticed, not changed" list.
 
-1. Run the setup's checks. If one fails, give the output to the coder to fix the cause (never by
-   skipping or deleting tests). **At most 3 fix attempts.** Re-run a failed check once before
-   counting it, since some tests are flaky.
-2. When the checks pass, run the `review-loop` skill: a fresh review session, at most 2 fix
-   loops, done in one pass when the change is good. It returns a "Code review" section for the
-   PR body (never inline comments).
+### 6. Checks, clean-up, then review
+
+1. `incremental-build` ends with the full checks. If one fails, give the output to the coder to
+   fix the cause (never by skipping or deleting tests). **At most 3 fix attempts.** Re-run a
+   failed check once before counting it, since some tests are flaky.
+2. When the checks pass, run the `deslop` skill on the change. It removes leftover comments and
+   debug code in one commit. If it changed code, re-run the checks.
+3. Then run the `review-loop` skill: fresh review sessions, at most 2 fix loops, done in one pass
+   when the change is good. It returns a "Code review" section for the PR body (never inline
+   comments).
 
 ### 7. Finish
 
 **Success** (checks and review pass):
 - Commit and push. New issue: open the PR into the base branch with the coder's summary,
   "How to test", `Resolves #<n>` (and `Closes #<sub>` lines), the checks run, the fix attempts,
-  the review result, and the marker `<!-- runner -->` (close-out uses it to find the PR). Feedback job: push to the same PR and reply to the command (`<!-- runner -->`) with
+  the review result, the "Noticed, not changed" list (if any), and the marker `<!-- runner -->` (close-out uses it to find the PR). Feedback job: push to the same PR and reply to the command (`<!-- runner -->`) with
   what changed.
 - Request the assignee as reviewer: `gh pr edit <pr> --add-reviewer <owner>`.
 - Post the review's screenshots, if any (see "Screenshots comment").
