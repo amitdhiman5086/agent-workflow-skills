@@ -16,17 +16,6 @@ Apply to every issue, comment, PR body, review and report this skill writes.
 - Keep exact names: files, labels, commands, error text.
 - Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
 
-## Labels
-
-Label names in this skill are roles. The repo may use its own label for a role.
-- Read the `## Labels` section of the local settings file
-  `~/.config/agent-workflow/<owner>/<repo>.md` (`<owner>/<repo>` from
-  `gh repo view --json nameWithOwner`).
-- Use the repo's label for each role everywhere: `gh` commands, searches and comments. A role
-  missing from the file uses its role name.
-- No file yet: never create a label, since one with the same meaning may exist. Run the label
-  matching in the `workflow-setup` skill (Phase 4) first.
-
 Turn sized issues into issues an agent can finish without asking a single question.
 Groom runs unattended (a scheduled routine), so it acts on its own and explains every change in
 a comment. Nobody answers questions during a run.
@@ -165,9 +154,8 @@ each sub-issue gets its own section for its piece.
 ## 6. Hand over to a human
 
 For each groomed issue:
-- Swap the label `needs-grooming` → `agent-groomed` (create the label once if missing, see Labels:
-  `gh label create agent-groomed --color 0e8a16 --description "Groomed by agent, waiting for human"`,
-  same for `needs-info`, color `d93f0b`).
+- Swap the label `needs-grooming` → `agent-groomed`. Create `agent-groomed` or `needs-info` once if
+  missing, with the color and description from the label table in the `workflow-setup` skill (Phase 4).
 - Post one short comment starting with `<!-- groom:done -->`:
   "Groomed. Size M. Changed: <size or breakdown changes, or 'nothing'>. Review it, then add
   `agent-ready` (or groom it further yourself first)."

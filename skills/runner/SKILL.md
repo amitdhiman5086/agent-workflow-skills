@@ -1,6 +1,6 @@
 ---
 name: runner
-description: Build agent-ready GitHub issues into PRs. "setup" asks once per repo for the base branch, checks and branch prefix, reuses or creates the labels, saves the settings in a local file and writes the routine prompt. A run (scheduled every 15 minutes in the app) takes ONE job, either a new issue labelled agent-ready by its own assignee or an /agent-… command on one of its PRs, routes models with the route skill, builds it in small committed slices with the incremental-build skill, runs the checks, cleans the diff with the deslop skill, runs the review-loop skill, opens the PR and requests the assignee's review. Use for /runner setup, /runner, /runner <issue>.
+description: Build agent-ready GitHub issues into PRs. "setup" asks once per repo for the base branch, checks and branch prefix, creates the labels, saves the settings in a local file and writes the routine prompt. A run (scheduled every 15 minutes in the app) takes ONE job, either a new issue labelled agent-ready by its own assignee or an /agent-… command on one of its PRs, routes models with the route skill, builds it in small committed slices with the incremental-build skill, runs the checks, cleans the diff with the deslop skill, runs the review-loop skill, opens the PR and requests the assignee's review. Use for /runner setup, /runner, /runner <issue>.
 argument-hint: "setup | [issue number]"
 ---
 
@@ -15,17 +15,6 @@ Apply to every issue, comment, PR body, review and report this skill writes.
 - Leave out empty sections and anything the reader already sees in the issue, diff or labels.
 - Keep exact names: files, labels, commands, error text.
 - Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
-
-## Labels
-
-Label names in this skill are roles. The repo may use its own label for a role.
-- Read the `## Labels` section of the local settings file
-  `~/.config/agent-workflow/<owner>/<repo>.md` (`<owner>/<repo>` from
-  `gh repo view --json nameWithOwner`).
-- Use the repo's label for each role everywhere: `gh` commands, searches and comments. A role
-  missing from the file uses its role name.
-- No file yet: never create a label, since one with the same meaning may exist. Run the label
-  matching in the `workflow-setup` skill (Phase 4) first.
 
 Turns `agent-ready` issues into PRs. Each person has their own runner, and it only works on issues
 **assigned to that person**.
@@ -58,9 +47,9 @@ is missing or should change.
    (each only if the repo has it) plus the install command, e.g.
    `npm ci` → `npm run typecheck` → `npm test` → `npm run lint`. The user confirms or edits.
 4. **Branch prefix:** ask, defaulting to the user's first name in lowercase (e.g. `amit/`).
-5. **Labels:** if the local file has no `## Labels` section, run the label matching in the
-   `workflow-setup` skill (Phase 4). It reuses the repo's own labels where they mean the same and
-   asks once before creating any (the team sees them).
+5. **Labels:** list the missing ones among `agent-ready`, `agent-working`, `agent-pr-ready` and
+   `needs-human`. Ask once (the team sees them), then create them from the label table in the
+   `workflow-setup` skill (Phase 4).
 6. **UI preview:** when the runner builds in a git worktree and the app has a dev server, pick a
    port no other server uses. Save a named dev-server config that runs in the worktree on that
    port (for example a `.claude/launch.json` entry), so `review-loop` can open the change in a
