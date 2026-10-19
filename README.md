@@ -53,14 +53,11 @@ Called by the steps above, and useful on their own.
 | `agent-pr-ready` | Runner | PR open, your review requested |
 | `needs-human` | Runner, close-out | Stuck (draft PR), or PR closed without merging. Reply `/agent-retry` or `/agent-improve …` |
 
-These names are **roles**. Your repo may already have labels with the same meaning (for example
-`need:grooming` for `needs-grooming`). Setup reuses them and creates only the missing ones. It
-tags each reused label's description with `[workflow: <role>]`, so teammates' setup suggests the
-same match.
+The names are the same in every repo. Setup creates the missing ones; their colors and
+descriptions live in one place, `workflow-setup` Phase 4.
 
-The mapping and the runner settings live in a local file per person and repo, never committed:
-`~/.config/agent-workflow/<owner>/<repo>.md`. Every skill reads it; with no file, the skills use
-the role names.
+The runner's settings live in a local file per person and repo, never committed:
+`~/.config/agent-workflow/<owner>/<repo>.md`.
 
 No skill mentions cost, tokens or spend on GitHub; they report result metrics (checks, fix attempts, review loops, files changed) instead.
 

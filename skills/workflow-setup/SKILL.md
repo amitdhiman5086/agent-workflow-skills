@@ -1,6 +1,6 @@
 ---
 name: workflow-setup
-description: Guided, question-by-question setup of the team's issue-to-PR workflow (capture, size, groom, route, runner, review-loop, close-out, plus grill-me, incremental-build and deslop) for one person and one or more repos. Checks tools, installs the skills, reuses the repo's existing labels or creates missing ones, configures the runner, explains secrets, creates or prints the routines, and offers a test run. Safe to re-run; it only fills gaps. Use for /workflow-setup, "set up the workflow", "install the workflow skills", "onboard me to the agent workflow".
+description: Guided, question-by-question setup of the team's issue-to-PR workflow (capture, size, groom, route, runner, review-loop, close-out, plus grill-me, incremental-build and deslop) for one person and one or more repos. Checks tools, installs the skills, creates missing labels, configures the runner, explains secrets, creates or prints the routines, and offers a test run. Safe to re-run; it only fills gaps. Use for /workflow-setup, "set up the workflow", "install the workflow skills", "onboard me to the agent workflow".
 ---
 
 # Workflow setup
@@ -33,16 +33,10 @@ contains `README.md`, `skills/` and `routines/`. Read `README.md` for the flow a
 
 **Local settings file.** Each person keeps one file per repo on their own computer, outside the
 repo, so nothing is committed: `~/.config/agent-workflow/<owner>/<repo>.md` (`<owner>/<repo>` from
-`gh repo view --json nameWithOwner`). Every workflow skill reads it. Phases 4 and 5 write it:
+`gh repo view --json nameWithOwner`). It holds the runner's settings. Phase 5 writes it:
 
 ```markdown
 # Agent workflow: <owner>/<repo>
-
-## Labels
-| Role | Label |
-|---|---|
-| captured | captured |
-| needs-grooming | need:grooming |
 
 ## Runner
 - Owner: <github-login>
@@ -101,9 +95,10 @@ ln -s "<workflow>/skills/<name>" ~/.claude/skills/<name>
 
 ## Phase 4: Labels (per repo)
 
-The skills name labels by **role**. A role's default label has the same name:
+The workflow uses the same label names in every repo. This table is the one place their colors
+and descriptions live; the skills create a missing label from it.
 
-| Role | Color | Description (when created) |
+| Label | Color | Description |
 |---|---|---|
 | `captured` | `c5def5` | Captured, waiting for size and groom |
 | `size:S` | `c2e0c6` | Under 2 hours, 1-3 files |
@@ -117,42 +112,8 @@ The skills name labels by **role**. A role's default label has the same name:
 | `agent-pr-ready` | `5319e7` | Agent PR open, review requested |
 | `needs-human` | `b60205` | Agent stuck, or its PR closed without merging |
 
-The repo may already have labels with the same meaning. Reuse them; never create a second label
-for the same thing.
-
-1. **Read what exists.** The local file's `## Labels` section, if any: keep each row whose label
-   still exists and match the rest again. Then list the repo's labels:
-   `gh label list --limit 300 --json name,description`.
-2. **Match each role.** The first rule that finds a label wins:
-   1. Its description contains `[workflow: <role>]`: a teammate already mapped it.
-   2. Its name is exactly the role.
-   3. It means the same: the same name after lowercasing and ignoring `:` `-` `_` `/` `.` and
-      spaces, with `need` = `needs` and `groom` = `grooming` = `groomed` (`need:grooming`,
-      `Needs Grooming` and `agent-grooming-needed` all match `needs-grooming`); a synonym
-      (`size/small` or `effort: S` for `size:S`); or a description that says the same thing.
-
-   `agent-ready`, `agent-working` and `agent-pr-ready` start or track the agent's own work. Match
-   them only to a label whose name contains `agent`, `bot` or `ai`, never to a general one such
-   as `ready` or `in-progress`: the runner would act on people's own issues.
-3. **Show one table and ask once.** Count open issues per matched label with
-   `gh issue list --label "<label>" --state open --json number --jq length`.
-
-   | Role | Label | Why | Open issues |
-   |---|---|---|---|
-   | `needs-grooming` | `need:grooming` | same meaning | 12 |
-   | `agent-ready` | `agent-ready` (new) | no match | – |
-
-   Say what a yes does: which labels get created and which descriptions get tagged. The user may
-   change any row.
-4. **On yes:**
-   - Write the `## Labels` section of the local file, one row per role.
-   - Create each role that has no match, with the default name, color and description:
-     `gh label create "<role>" --color <color> --description "<description>"`.
-   - Tag each reused label whose name differs from its role, so a teammate's setup suggests the
-     same match: append ` [workflow: <role>]` to its description with
-     `gh label edit "<label>" --description "<new description>"`. GitHub allows 100 characters;
-     shorten the old text if needed.
-   - Never rename or delete a label.
+List which exist (`gh label list --limit 300`) and which are missing. Ask once, then create the
+missing ones: `gh label create "<label>" --color <color> --description "<description>"`.
 
 ## Phase 5: Runner settings (full role, per repo)
 
@@ -195,7 +156,7 @@ Two routines, created as scheduled tasks in the agentic app:
 2. Check the routine can read the skills and the local file. A local routine (runs on this
    computer) can. A cloud routine cannot: the skills must be in the repo (`.claude/skills/`) or a
    shared plugin (Phase 3's "In the repo"), and the local file's content goes into its prompt.
-3. Fill in the prompts with the local file's path (Phases 4 and 5) and the models (Phase 6).
+3. Fill in the prompts with the local file's path (Phase 5) and the models (Phase 6).
 4. If the app lets you create scheduled routines, offer to create them. Otherwise show the filled
    prompts and the settings to paste.
 
@@ -210,6 +171,6 @@ Stop at any step the user wants to skip.
 
 ## Phase 10: Summary
 
-Show the checklist: tools ✓, skills installed (where), local file path, labels (reused, created,
-tagged), runner settings, models, secrets the user still has to add, routines (created or prompts given), test
+Show the checklist: tools ✓, skills installed (where), local file path, labels (created or existing),
+runner settings, models, secrets the user still has to add, routines (created or prompts given), test
 result, and anything left to do.

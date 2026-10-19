@@ -16,17 +16,6 @@ Apply to every issue, comment, PR body, review and report this skill writes.
 - Keep exact names: files, labels, commands, error text.
 - Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
 
-## Labels
-
-Label names in this skill are roles. The repo may use its own label for a role.
-- Read the `## Labels` section of the local settings file
-  `~/.config/agent-workflow/<owner>/<repo>.md` (`<owner>/<repo>` from
-  `gh repo view --json nameWithOwner`).
-- Use the repo's label for each role everywhere: `gh` commands, searches and comments. A role
-  missing from the file uses its role name.
-- No file yet: never create a label, since one with the same meaning may exist. Run the label
-  matching in the `workflow-setup` skill (Phase 4) first.
-
 Turn what the user gives you into clear GitHub issues. Capture records **what** and **why**.
 It does not plan the work: sizing, breakdown and the detailed "Done when" come later in
 `/size` and `/groom`.
@@ -137,9 +126,8 @@ Never mention cost, tokens or spend in anything posted to GitHub (issues, PRs, c
 Show every draft (title + body). Ask **"Create these issues?"** and wait for a clear yes.
 Creating issues is visible to the whole team. Apply any edits first.
 
-The first time in a repo, check the `captured` role's label exists (see Labels). If it is
-missing, ask before creating it:
-`gh label create captured --color c5def5 --description "Captured, waiting for size and groom"`.
+The first time in a repo, check the `captured` label exists. If it is missing, ask before
+creating it, with the color and description from the label table in the `workflow-setup` skill (Phase 4).
 
 Then for each draft, write the body to a temp file and run:
 

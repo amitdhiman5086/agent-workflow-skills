@@ -17,7 +17,7 @@ creates their own runner routine. `/runner setup` fills in this prompt for you.
 ```
 Run the runner skill on this repository: take ONE job and finish it.
 
-Settings and labels: ~/.config/agent-workflow/<owner>/<repo>.md
+Settings: ~/.config/agent-workflow/<owner>/<repo>.md
 
 Start with the close-out skill for merged or closed agent PRs. Then follow the skill exactly: only issues assigned to the owner where the owner added agent-ready,
 or /agent-… commands from the owner on its PRs; claim with agent-working first; route models
