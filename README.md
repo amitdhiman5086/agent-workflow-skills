@@ -24,7 +24,7 @@ The agent asks you questions and does the setup. See [SETUP.md](SETUP.md).
 | 2 | `/size` | `size:S/M/L` + `needs-grooming`; L becomes a parent with up to 6 ordered sub-issues, each a vertical slice | Automatic after capture | Ready |
 | 3 | `/groom` | Checks it is not already built and confirms bugs, re-checks size and sub-issues, decides technical questions itself, writes Done when / where to look / tests / out of scope / agent hints → `agent-groomed`, or `needs-info` with numbered questions only for real decisions | Routine, hourly, max 5 | Ready |
 | 4 | You | Review, groom further if you want, add `agent-ready` and assign to yourself | By you | — |
-| 5 | `/runner` | `setup` once per repo (base branch, checks, prefix, labels, UI preview, saved in your local file) and writes the routine prompt; each run builds ONE job (your `agent-ready` issue or an `/agent-…` command on its PR) with `/incremental-build`, then `/deslop`, then `/review-loop` | Routine, every 15 min | Ready |
+| 5 | `/runner` | `setup` once per repo (base branch, checks, prefix, labels, UI preview, saved in your local file) and writes the routine prompt; each run builds ONE job (your `agent-ready` issue, or an `/agent-…` command on its PR or issue from anyone with write access) with `/incremental-build`, then `/deslop`, then `/review-loop` | Routine, every 15 min | Ready |
 | 6 | `/route` | Reads Groom's `Route:` line (size fallback): plan `none` or Opus at xhigh effort, and which model codes and reviews | Called by runner | Ready |
 | 7 | `/review-loop` | Two fresh reviewers in parallel: Spec (Done when, scope, bugs) and Standards (rules, leftovers, smells), plus the UI in a browser; findings rest on what they ran or read; every finding goes back to the coder; max 2 loops; result in the PR body | Called by runner | Ready |
 | 8 | `/close-out` | Merged: closes issue + sub-issues (and the parent when all subs are done), deletes the runner's branch, posts a metrics summary. Closed unmerged: `needs-human`, branch kept | Start of every runner run | Ready |
@@ -55,6 +55,21 @@ Called by the steps above, and useful on their own.
 
 The names are the same in every repo. Setup creates the missing ones; their colors and
 descriptions live in one place, `workflow-setup` Phase 4.
+
+## Asking the runner for changes
+
+Anyone with write access to the repo can comment on an agent PR, or on the issue it is built
+for. Start the comment with a command:
+
+| Command | What the runner does |
+|---|---|
+| `/agent-improve <what>` | Changes the PR as described |
+| `/agent-refer above` or `/agent-refer <comment link>` | Acts on that comment |
+| `/agent-retry` | Tries again after `needs-human` |
+| `/agent-help` | Replies with this table |
+
+The PR owner's runner picks it up within 15 minutes and replies where the command was posted.
+Plain comments are ignored. Only the assignee can add `agent-ready`.
 
 The runner's settings live in a local file per person and repo, never committed:
 `~/.config/agent-workflow/<owner>/<repo>.md`.

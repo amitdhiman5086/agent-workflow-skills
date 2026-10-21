@@ -20,7 +20,7 @@ Run the runner skill on this repository: take ONE job and finish it.
 Settings: ~/.config/agent-workflow/<owner>/<repo>.md
 
 Start with the close-out skill for merged or closed agent PRs. Then follow the skill exactly: only issues assigned to the owner where the owner added agent-ready,
-or /agent-… commands from the owner on its PRs; claim with agent-working first; route models
+or /agent-… commands from anyone with write access to the repo, posted on its open agent PRs or on the issues they are built for; claim with agent-working first; route models
 with the route skill; at most 3 check-fix attempts and 2 review loops; on success open the PR,
 request the owner's review and label agent-pr-ready; when stuck open a draft PR and label
 needs-human. End with the one-line report.
