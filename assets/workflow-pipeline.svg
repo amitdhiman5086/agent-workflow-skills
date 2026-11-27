@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 436" width="960" height="436" role="img" aria-label="Animated GitHub Issue-to-PR Workflow Pipeline">
+  <defs>
+    <linearGradient id="pipe-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#58a6ff"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#a371f7"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#3fb950"/>
+    </marker>
+    <filter id="orb-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+      @keyframes dashFlow {
+        to { stroke-dashoffset: -24; }
+      }
+      .handoff-dash {
+        stroke-dasharray: 6 6;
+        animation: dashFlow 1.2s linear infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .handoff-dash { animation: none; }
+      }
+    </style>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="1" y="1" width="958" height="434" rx="16" fill="url(#pipe-bg)" stroke="#30363d" stroke-width="1.5"/>
+
+  <!-- LANE 1 HEADER (ample gap before XL pill at x=284) -->
+  <text x="36" y="34" class="mono" font-size="11.5" font-weight="700" fill="#58a6ff" letter-spacing="0.8">PHASE 1 · SHAPE, SIZE &amp; GROOM</text>
+  <rect x="284" y="19" width="174" height="21" rx="10.5" fill="#161b22" stroke="#30363d"/>
+  <text x="371" y="33.5" text-anchor="middle" class="mono" font-size="10.5" fill="#8b949e">XL (&gt;6 slices) → /wayfinder</text>
+  <text x="924" y="34" text-anchor="end" class="sans" font-size="12" fill="#8b949e">Interactive + Hourly Groom Routine</text>
+
+  <!-- Lane 1 Connector Lines -->
+  <line x1="231" y1="100" x2="263" y2="100" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <line x1="462" y1="100" x2="494" y2="100" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <line x1="703" y1="100" x2="735" y2="100" stroke="#3fb950" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+  <!-- Clean Orthogonal-Curved Handoff (runs at y=184, drops at x=133, never crossing PHASE 2 text at x=156) -->
+  <path d="M 831 148 L 831 174 Q 831 188 817 188 L 147 188 Q 133 188 133 202 L 133 254" fill="none" stroke="#58a6ff" stroke-width="1.8" stroke-opacity="0.7" class="handoff-dash" marker-end="url(#arrow-purple)"/>
+
+  <!-- Card 1: /capture -->
+  <g transform="translate(36, 52)">
+    <rect width="195" height="96" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+    <text x="14" y="25" class="mono" font-size="13" font-weight="700" fill="#f0f6fc">1. /capture</text>
+    <rect x="116" y="11" width="66" height="19" rx="9.5" fill="#1f6feb" fill-opacity="0.2" stroke="#58a6ff" stroke-width="0.8"/>
+    <text x="149" y="24" text-anchor="middle" class="mono" font-size="10" fill="#79c0ff">captured</text>
+    <text x="14" y="48" class="sans" font-size="12" fill="#c9d1d9">Short grill-me Q&amp;A rounds</text>
+    <text x="14" y="66" class="sans" font-size="11.5" fill="#8b949e">Deduplicates &amp; drafts &lt;100w</text>
+    <text x="14" y="83" class="mono" font-size="10.5" fill="#58a6ff">auto-runs /size →</text>
+  </g>
+
+  <!-- Card 2: /size -->
+  <g transform="translate(267, 52)">
+    <rect width="195" height="96" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+    <text x="14" y="25" class="mono" font-size="13" font-weight="700" fill="#f0f6fc">2. /size</text>
+    <rect x="86" y="11" width="96" height="19" rx="9.5" fill="#1f6feb" fill-opacity="0.2" stroke="#58a6ff" stroke-width="0.8"/>
+    <text x="134" y="24" text-anchor="middle" class="mono" font-size="10" fill="#79c0ff">needs-grooming</text>
+    <text x="14" y="48" class="sans" font-size="12" fill="#c9d1d9">Labels size:S · M · L</text>
+    <text x="14" y="66" class="sans" font-size="11.5" fill="#8b949e">Splits L into ≤6 vertical</text>
+    <text x="14" y="83" class="sans" font-size="11.5" fill="#8b949e">native GitHub sub-issues</text>
+  </g>
+
+  <!-- Card 3: /groom -->
+  <g transform="translate(498, 52)">
+    <rect width="205" height="96" rx="10" fill="#161b22" stroke="#58a6ff" stroke-width="1.3"/>
+    <text x="14" y="25" class="mono" font-size="13" font-weight="700" fill="#f0f6fc">3. /groom</text>
+    <rect x="98" y="11" width="94" height="19" rx="9.5" fill="#238636" fill-opacity="0.25" stroke="#3fb950" stroke-width="0.8"/>
+    <text x="145" y="24" text-anchor="middle" class="mono" font-size="10" fill="#56d364">agent-groomed</text>
+    <text x="14" y="48" class="sans" font-size="12" fill="#c9d1d9">Verifies code &amp; settles rulings</text>
+    <text x="14" y="66" class="sans" font-size="11.5" fill="#8b949e">Writes Where-to-look pack</text>
+    <text x="14" y="83" class="mono" font-size="10.5" fill="#d29922">Blocked? → needs-info ↺</text>
+  </g>
+
+  <!-- Card 4: Approve (clean spacing before agent-ready badge) -->
+  <g transform="translate(739, 52)">
+    <rect width="185" height="96" rx="10" fill="#161b22" stroke="#3fb950" stroke-width="1.3"/>
+    <text x="14" y="25" class="sans" font-size="13" font-weight="700" fill="#f0f6fc">4. Approve</text>
+    <rect x="96" y="11" width="76" height="19" rx="9.5" fill="#1f6feb" fill-opacity="0.3" stroke="#58a6ff" stroke-width="0.9"/>
+    <text x="134" y="24" text-anchor="middle" class="mono" font-size="10" fill="#79c0ff">agent-ready</text>
+    <text x="14" y="48" class="sans" font-size="12" fill="#c9d1d9">Quick spec sanity check</text>
+    <text x="14" y="66" class="sans" font-size="11.5" fill="#8b949e">Self-assign &amp; approve</text>
+    <text x="14" y="83" class="mono" font-size="10.5" fill="#3fb950">Actor verified via API ✔</text>
+  </g>
+
+  <!-- LANE 2 HEADER (starts at x=156 so vertical handoff line at x=133 never crosses text) -->
+  <text x="156" y="236" class="mono" font-size="11.5" font-weight="700" fill="#a371f7" letter-spacing="0.8">PHASE 2 · AUTONOMOUS BUILD, REVIEW &amp; CLOSE-OUT</text>
+  <text x="924" y="236" text-anchor="end" class="sans" font-size="12" fill="#8b949e">15-Min Runner Routine (1 Job / Run)</text>
+
+  <!-- Lane 2 Connector Lines -->
+  <line x1="231" y1="310" x2="263" y2="310" stroke="#a371f7" stroke-width="2" marker-end="url(#arrow-purple)"/>
+  <line x1="472" y1="310" x2="504" y2="310" stroke="#a371f7" stroke-width="2" marker-end="url(#arrow-purple)"/>
+  <line x1="713" y1="310" x2="745" y2="310" stroke="#3fb950" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+  <!-- Card 5: /runner + /route -->
+  <g transform="translate(36, 258)">
+    <rect width="195" height="104" rx="10" fill="#161b22" stroke="#a371f7" stroke-width="1.2"/>
+    <text x="14" y="25" class="mono" font-size="13" font-weight="700" fill="#f0f6fc">5. /runner + /route</text>
+    <rect x="14" y="34" width="88" height="18" rx="9" fill="#9e6a03" fill-opacity="0.28" stroke="#d29922" stroke-width="0.8"/>
+    <text x="58" y="46.5" text-anchor="middle" class="mono" font-size="10" fill="#e3b341">agent-working</text>
+    <text x="14" y="70" class="sans" font-size="11.5" fill="#c9d1d9">Silent lock · Tiered models:</text>
+    <text x="14" y="88" class="mono" font-size="11" fill="#a371f7">fast · standard · deep</text>
+  </g>
+
+  <!-- Card 6: /incremental-build + /deslop -->
+  <g transform="translate(267, 258)">
+    <rect width="205" height="104" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+    <text x="14" y="25" class="mono" font-size="13" font-weight="700" fill="#f0f6fc">6. Build + /deslop</text>
+    <text x="14" y="47" class="sans" font-size="12" fill="#c9d1d9">• S / Bug: 1-commit fast-path</text>
+    <text x="14" y="65" class="sans" font-size="12" fill="#c9d1d9">• M / L: vertical TDD slices</text>
+    <text x="14" y="86" class="mono" font-size="10.5" fill="#58a6ff">Diff cleanup + 1 check pass</text>
+  </g>
+
+  <!-- Card 7: /review-loop -->
+  <g transform="translate(508, 258)">
+    <rect width="205" height="104" rx="10" fill="#161b22" stroke="#a371f7" stroke-width="1.3"/>
+    <text x="14" y="25" class="mono" font-size="13" font-weight="700" fill="#f0f6fc">7. /review-loop</text>
+    <text x="14" y="47" class="sans" font-size="12" fill="#c9d1d9">Fresh zero-memory session(s)</text>
+    <text x="14" y="65" class="sans" font-size="11.5" fill="#8b949e">Single or Dual + Browser UI</text>
+    <text x="14" y="86" class="mono" font-size="10.5" fill="#3fb950">Loops ONLY on must-fix (≤2)</text>
+  </g>
+
+  <!-- Card 8: PR + /close-out -->
+  <g transform="translate(749, 258)">
+    <rect width="175" height="104" rx="10" fill="#161b22" stroke="#3fb950" stroke-width="1.4"/>
+    <text x="14" y="25" class="mono" font-size="13" font-weight="700" fill="#3fb950">8. Ship &amp; Close</text>
+    <rect x="14" y="34" width="90" height="18" rx="9" fill="#8957e5" fill-opacity="0.28" stroke="#a371f7" stroke-width="0.8"/>
+    <text x="59" y="46.5" text-anchor="middle" class="mono" font-size="10" fill="#d2a8ff">agent-pr-ready</text>
+    <text x="14" y="70" class="sans" font-size="11.5" fill="#c9d1d9">&lt;100w PR · Owner review</text>
+    <text x="14" y="88" class="mono" font-size="10.5" fill="#3fb950">Merge → /close-out ✔</text>
+  </g>
+
+  <!-- Animated Traveling Signal Orbs (negative begin starts mid-path immediately — zero (0,0) artifact!) -->
+  <circle r="5" fill="#58a6ff" filter="url(#orb-glow)">
+    <animateMotion dur="8s" repeatCount="indefinite"
+      path="M 133 100 L 364 100 L 600 100 L 831 100 L 831 188 L 133 188 L 133 310 L 369 310 L 610 310 L 836 310"/>
+  </circle>
+  <circle r="4.5" fill="#3fb950" filter="url(#orb-glow)">
+    <animateMotion dur="8s" begin="-4s" repeatCount="indefinite"
+      path="M 133 100 L 364 100 L 600 100 L 831 100 L 831 188 L 133 188 L 133 310 L 369 310 L 610 310 L 836 310"/>
+  </circle>
+
+  <!-- Bottom Bar: Commands & Fallback -->
+  <rect x="36" y="382" width="888" height="34" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="52" y="403" class="mono" font-size="11" fill="#c9d1d9">
+    <tspan fill="#f85149" font-weight="600">Stuck?</tspan> Opens safe Draft PR (<tspan fill="#ff7b72">needs-human</tspan>)  ·  Teammate commands:
+    <tspan fill="#79c0ff">/agent-improve</tspan> · <tspan fill="#79c0ff">/agent-refer</tspan> · <tspan fill="#79c0ff">/agent-retry</tspan>
+  </text>
+</svg>

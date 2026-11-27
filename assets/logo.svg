@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Agent Workflow Logo">
+  <defs>
+    <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#58a6ff"/>
+      <stop offset="55%" stop-color="#a371f7"/>
+      <stop offset="100%" stop-color="#3fb950"/>
+    </linearGradient>
+  </defs>
+  <rect x="14" y="14" width="100" height="100" rx="24" fill="#0d1117" stroke="url(#lg)" stroke-width="5"/>
+  <circle cx="42" cy="44" r="9" fill="none" stroke="#58a6ff" stroke-width="4.5"/>
+  <circle cx="42" cy="84" r="9" fill="none" stroke="#a371f7" stroke-width="4.5"/>
+  <circle cx="86" cy="64" r="10" fill="none" stroke="#3fb950" stroke-width="4.5"/>
+  <path d="M 42 53 L 42 75 M 51 44 C 66 44, 66 64, 76 64 M 51 84 C 66 84, 66 64, 76 64" fill="none" stroke="url(#lg)" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M 82 64 L 85 67 L 91 61" fill="none" stroke="#3fb950" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
