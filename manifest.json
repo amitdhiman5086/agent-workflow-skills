@@ -1,0 +1,61 @@
+{
+  "name": "agent-workflow",
+  "version": "2.0.0",
+  "coreSkills": [
+    "capture",
+    "size",
+    "groom",
+    "grill-me",
+    "wayfinder",
+    "workflow-setup",
+    "workflow-upgrade"
+  ],
+  "fullSkills": [
+    "route",
+    "runner",
+    "incremental-build",
+    "deslop",
+    "review-loop",
+    "close-out"
+  ],
+  "deprecatedSkills": [],
+  "labels": [
+    { "name": "captured", "color": "c5def5", "description": "Captured, waiting for size and groom" },
+    { "name": "size:S", "color": "c2e0c6", "description": "Under 2 hours, 1-3 files" },
+    { "name": "size:M", "color": "fef2c0", "description": "Up to 1 day, under 10 files" },
+    { "name": "size:L", "color": "f9d0c4", "description": "More than 1 day; split into sub-issues" },
+    { "name": "needs-grooming", "color": "bfd4f2", "description": "Sized, waiting for the Groom routine" },
+    { "name": "needs-info", "color": "d93f0b", "description": "Blocked on a human decision" },
+    { "name": "agent-groomed", "color": "0e8a16", "description": "Groomed by agent, waiting for human" },
+    { "name": "agent-ready", "color": "1d76db", "description": "Approved for the agent to build" },
+    { "name": "agent-working", "color": "fbca04", "description": "Agent is building this" },
+    { "name": "agent-pr-ready", "color": "5319e7", "description": "Agent PR open, review requested" },
+    { "name": "needs-human", "color": "b60205", "description": "Agent stuck, or its PR closed without merging" }
+  ],
+  "configKeys": [
+    "Workflow version",
+    "Role",
+    "Agent",
+    "Owner",
+    "Base branch",
+    "Branch prefix",
+    "Install",
+    "Checks",
+    "UI preview",
+    "Screenshot branch",
+    "Model map",
+    "Routine versions"
+  ],
+  "routines": {
+    "groom": { "version": "2.0.0", "path": "routines/groom.md" },
+    "runner": { "version": "2.0.0", "path": "routines/runner.md" }
+  },
+  "agentInstallPaths": {
+    "claude": { "personal": "~/.claude/skills", "repo": ".claude/skills", "plugin": ".claude-plugin/plugin.json" },
+    "antigravity": { "personal": "~/.gemini/config/skills", "repo": ".agents/skills", "plugin": "plugin.json" },
+    "codex": { "personal": "~/.agents/skills", "repo": ".agents/skills", "plugin": ".codex-plugin/plugin.json" },
+    "opencode": { "personal": "~/.config/opencode/skills", "repo": ".opencode/skills", "plugin": ".opencode/skills" },
+    "cursor": { "personal": "~/.cursor/skills", "repo": ".cursor/skills", "plugin": ".cursor-plugin/plugin.json" },
+    "gemini": { "personal": "~/.gemini/skills", "repo": ".agents/skills", "plugin": "gemini-extension.json" }
+  }
+}

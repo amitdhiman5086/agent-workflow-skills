@@ -1,0 +1,6 @@
+{
+  "name": "agent-workflow",
+  "description": "Lean, multi-agent GitHub issue-to-PR workflow: capture, size, groom, route, build, review, close-out, and one-command upgrades.",
+  "version": "2.0.0",
+  "contextFileName": "references/rules.md"
+}

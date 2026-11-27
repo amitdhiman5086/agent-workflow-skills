@@ -1,31 +1,29 @@
-# Groom routine
+# Groom routine (`v2.0.0`)
 
-Runs the `groom` skill on a schedule inside your agentic app (Claude, Codex or similar).
+Runs the `groom` skill unattended on an hourly schedule in any coding agent or CLI runner. **Run one Groom routine per repository.**
 
 ## Settings
 
 | Setting | Value |
 |---|---|
-| Schedule | Every hour |
-| Model | Most capable available, high effort (Claude: Opus 5.5, high) |
-| Repository | The repo to groom, e.g. `your-org/your-repo` |
-| Needs | The `groom` skill available to the routine, and GitHub access that can edit issues, labels and comments |
+| Schedule | Every hour (`0 * * * *`) |
+| Model tier | `deep` — strongest reasoning model available (Opus high / GPT-5 high / Gemini Pro-Carbon) |
+| Repository | `your-org/your-repo` |
+| Needs | `groom` skill + GitHub access for issues, labels, sub-issues, and comments |
 
 ## Prompt
 
-Paste this as the routine's prompt:
-
-```
-Run the groom skill on this repository with no issue number: groom the open issues labelled
-needs-grooming, and the needs-info issues that got an answer, at most 5 this run.
-Follow the skill exactly: never touch agent-ready, agent-working or closed issues; ask for a
-human decision only with the needs-info label and a comment; explain every size or sub-issue
-change in a comment. End with the one-line-per-issue report.
+```text
+Run the groom skill on this repository with no issue number: process at most 5 oldest open issues labelled needs-grooming (plus needs-info issues answered after Groom's question comment).
+Never touch closed, agent-ready, or agent-working issues. Settle technical rulings from code yourself; use needs-info only for human product/design/access decisions. Write the compact <!-- groom:start --> context pack (<120 words), swap to agent-groomed, comment only if size/breakdown changed, and finish with a 1-line-per-issue report.
 ```
 
-## Before the first run
+## Running across agents
 
-- A local routine (runs on your computer) reads the skill where it is.
-- A cloud routine cannot see your computer. The skill must reach it through a shared place (the
-  team plugin or the repo's `.claude/skills/`).
-- Try the skill once by hand on one issue (`/groom <number>`) and read the result.
+- **App schedulers** (Claude Code Routines, Antigravity `/schedule`): paste the prompt above. Cloud runners need the skills installed in-repo (`.agents/skills/` or `.claude/skills/`) or via a shared plugin.
+- **CLI / Cron / GitHub Actions** (Claude CLI, Codex, OpenCode, Gemini CLI):
+  ```bash
+  # Example hourly cron using your preferred coding agent CLI:
+  claude -p "$(sed -n '/^```text$/,/^```$/p' routines/groom.md | sed '1d;$d')"
+  # or: codex exec "..." / opencode run "..." / gemini -p "..."
+  ```

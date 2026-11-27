@@ -1,167 +1,73 @@
 ---
 name: groom
-description: Make GitHub issues agent-ready. Picks up issues labelled needs-grooming (and needs-info issues that got an answer), re-checks size and sub-issues with fresh judgement, writes Done when, where to look, tests, out of scope and agent hints, then hands them to a human with the agent-groomed label. Stops with needs-info when only a human can decide. Third step of the team workflow (capture → size → groom → human → agent). Runs as a scheduled routine, max 5 issues per run. Use for /groom, /groom <issue>, "groom the backlog".
-argument-hint: "[issue number] (empty = everything waiting, max 5)"
+description: Make GitHub issues agent-ready. Unattended routine that picks up needs-grooming (and answered needs-info) issues, verifies code/bugs, settles technical rulings, writes a compact context pack and Route hint, and marks agent-groomed. Max 5 issues per run. Use for /groom, /groom <issue>, "groom the backlog".
+argument-hint: "[issue number] (empty = oldest waiting, max 5)"
 ---
 
 # Groom
 
-## Writing rules
+Follow `../../references/rules.md` when present: groomed block under 120 words, comments 1–2 lines, max 1-line narration between tool calls, and **never mention cost, tokens, or spend on GitHub**.
 
-Apply to every issue, comment, PR body, review and report this skill writes.
+Runs unattended on the **`deep`** model tier (strongest reasoning model available).
 
-- Write to the point: facts, decisions, next step. No greetings, filler, hedging, recaps or praise.
-- Short sentences. Bullets over paragraphs. One idea per bullet.
-- Leave out empty sections and anything the reader already sees in the issue, diff or labels.
-- Keep exact names: files, labels, commands, error text.
-- Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
+## 1. Pick work (max 5, oldest first; parent + sub-issues = 1)
+With an argument: groom that issue (and its sub-issues). Without one, collect open issues:
+1. Labelled `needs-grooming`.
+2. Labelled `needs-info` whose newest comment is newer than the latest `<!-- groom:question -->` comment and not authored by Groom/Size (`yes` accepts all recommendations; `Q2: b` selects an option).
 
-Turn sized issues into issues an agent can finish without asking a single question.
-Groom runs unattended (a scheduled routine), so it acts on its own and explains every change in
-a comment. Nobody answers questions during a run.
+**Never touch** closed issues, issues labelled `agent-ready` or `agent-working`, or issues with an open linked PR.
 
-Recommended model: the most capable one available, high effort (e.g. Opus 5.5, high).
+## 2. Verify in code
+- Read issue body, comments, parent/sub-issues, and `AGENTS.md` (fallback `CLAUDE.md`, `GEMINI.md`).
+- Treat `/capture`'s `Agreed` bullets as settled.
+- **Already implemented?** Search by behavior. If present, ask via `needs-info` whether to close, citing `file:line`.
+- **Bug?** Reproduce cheaply or trace exact code path; record `Reproduced: ...` or `Code path: ...` in `Where to look`.
 
-## Label flow
+## 3. Rulings, not stalls
+Settle technical choices yourself from code and repo conventions; list non-obvious ones as 1-line `Ruling:` bullets under `Agent hints`.
 
-```
-/capture ─> captured ─/size─> needs-grooming ─Groom─> agent-groomed ─you─> agent-ready
-                                                 │
-                                                 └─> needs-info ─(someone answers)─> Groom again
-```
+Stop with `needs-info` **only** when code cannot answer (product/UX choice, missing copy/design, missing external access, contradictory spec):
+- Post 1 comment starting `<!-- groom:question -->` mentioning the author, using terse `grill-me` questions (1–2 sentences each + `➡️` recommendation, ending `"Reply yes to accept all, or Q1: ..."`).
+- Swap `needs-grooming` → `needs-info` and move on.
 
-## GitHub access
+## 4. Re-check size & breakdown
+Adjust `size:S|M|L` or split/merge/reorder sub-issues freely (each `S` or `M`, ≤6 vertical slices; if >6, swap to `needs-info` and recommend `/wayfinder #<n>`). Groom any newly created sub-issues in the same run.
 
-Use `gh` when it is installed and logged in. Otherwise use the GitHub tools or connector of the
-app you run in. The `gh` commands below show exactly what to do.
-
-## 1. Pick the work
-
-With an issue number: groom that issue (and its sub-issues if it is a parent).
-
-Without one, in the current repo, collect:
-
-1. Open issues labelled `needs-grooming`.
-2. Open issues labelled `needs-info` whose newest comment is newer than Groom's question
-   comment (marked `<!-- groom:question -->`) and is not from Groom. Treat them as
-   `needs-grooming` again. A reply of `yes` accepts every recommendation in the question
-   comment; `Q2: b` picks an option.
-
-```
-gh issue list --label needs-grooming --state open --json number,title,createdAt --limit 50
-gh issue list --label needs-info --state open --json number --limit 50
-```
-
-Oldest first. **At most 5 per run.** A parent and its sub-issues count as one. The rest wait for
-the next run.
-
-**Never touch** an issue that is closed, labelled `agent-ready` or `agent-working`, or has an
-open PR linked to it.
-
-## 2. Understand it
-
-- Read the issue body, its comments, its parent (`gh api repos/{owner}/{repo}/issues/<n>/parent`)
-  and its sub-issues (`.../sub_issues`).
-- Read the repo's `CLAUDE.md` and the docs and skills it points to.
-- Read the code for real: the files involved, similar existing features to copy, tests nearby.
-- The issue's "Agreed" section (from `/capture`) holds settled decisions. Never ask them again.
-- **Already built?** Search the code for the behavior by what it does, not only by the issue's
-  words. If it exists, ask (step 3) whether to close the issue, and say where it lives.
-- **A bug?** Confirm it first: reproduce it with a test or a short script when that is cheap,
-  otherwise walk the code path step by step. Write the result under "Where to look"
-  (`Reproduced: …` or `Code path: …`). If you cannot confirm it and the steps are missing, ask
-  (step 3).
-
-## 3. Decide, or ask
-
-Decide technical questions yourself, from the code, existing patterns, the project rules and the
-"Agreed" section. Write each decision into the groomed section ("Where to look", "Risks"), so a
-human can see it and change it.
-
-Ask only when the code cannot answer and a wrong guess would waste the work: a product choice,
-missing design or copy, conflicting requirements, access the agent will not have.
-
-Then:
-- Post one comment that starts with `<!-- groom:question -->` and mentions the issue author. Use
-  the `grill-me` format: numbered questions, each with its options and your recommended answer.
-  End with: "Reply `yes` to accept all recommendations, or answer per question (`Q2: b`)."
-- Swap the label `needs-grooming` → `needs-info`. Change nothing else. Move on.
-
-Do **not** stop for things you can find in the code or decide from existing patterns.
-
-## 4. Re-check size and breakdown
-
-You have deeper context than `/size` had. Use the same scale:
-
-| Size | Effort | Files |
-|---|---|---|
-| S | under 2 hours | 1–3 |
-| M | up to 1 day | under 10 |
-| L | more than 1 day | 10 or more, or a new design, or UI + server + DB |
-
-One size up for a database migration, tenant-scoped data access, or unclear requirements.
-
-You may change freely, as long as no issue involved is `agent-ready` or later:
-- Fix the `size:*` label.
-- Split an issue that is really L into sub-issues (each S or M, mergeable alone, vertical
-  slices ordered as in `/size`, tests with their code, at most 6).
-- Edit, add, reorder or merge sub-issues. Close a wrong sub-issue with
-  `gh issue close <n> --reason "not planned"` and a comment saying where its work went.
-- Fold an over-split parent back into one issue.
-
-New sub-issues: create in order, then link with
-`gh api -X POST repos/{owner}/{repo}/issues/<parent>/sub_issues -F sub_issue_id=<issue .id>`.
-Give them `needs-grooming` and groom them in this same run.
-
-## 5. Write the groomed section
-
-Keep the original text (What / Why / Details). Add or **replace** one section between markers,
-so grooming again never duplicates it:
+## 5. Write replaceable Context Pack (<120 words, omit empty parts)
+Insert or replace between `<!-- groom:start -->` and `<!-- groom:end -->` (downstream builders read `Where to look` directly instead of re-searching the repo):
 
 ```markdown
 <!-- groom:start -->
 ## Done when
-- [ ] Each item checkable by running or looking at something. No "works well".
+- [ ] Checkable outcome (command or visible behavior).
 
 ## Where to look
-- `path/file.ts:40-72` (`functionName`): what it does now and what changes.
-- Pattern to copy: `path/to/similar-feature/`.
+- `path/file.ts:40-72` (`symbol`): current behavior → required change.
+- Pattern: `path/similar.ts:10-30`
 
 ## Tests
-Add tests only where they protect something: logic, data access, tenant scoping, security,
-or a bug that must not come back. Name the cases, e.g. "out-of-scope site returns not found".
-Otherwise write: "No new tests. Verify by: <steps in the browser or app>."
+- Named cases to add, or `None — verify by: <exact step>`.
 
 ## Out of scope
-- What must not change.
+- Boundaries not to touch.
 
 ## Agent hints
-- Route: plan <none|opus> · code <sonnet|opus> · review <sonnet|opus>
-- Base: <branch>   (only when it should not use the repo's usual base branch)
-- Risks: anything the agent must be careful with, and the project rules that apply.
+- Type: <bug | feature | refactor>
+- Route: plan <none|deep> · code <standard|deep> · review <single|dual> (<standard|deep>)
+- Base: <branch>   <!-- omit when default -->
+- Rulings / Risks: <1 line per ruling or repo rule that applies>
 <!-- groom:end -->
 ```
 
-Choosing the Route line (the runner follows it exactly):
-- `plan`: `none` for a clear S; `opus` for everything else. The plan runs on Opus at xhigh
-  effort (see the `incremental-build` skill).
-- `code`: `sonnet` by default; `opus` only when the coding itself needs deep reasoning.
-- `review`: `sonnet` by default; `opus` for security, tenancy or data-loss risk.
+**Choosing `Route`:**
+- `plan`: `none` for `size:S` or clear single-root-cause `bug`; `deep` for `M`/`L`.
+- `code`: `standard` by default; `deep` only for complex algorithms/concurrency.
+- `review`: `single (standard)` by default; `dual (deep)` for auth, security, tenancy, DB migrations, or irreversible contracts.
 
-For a parent with sub-issues, the parent's section covers the whole result and the order of work;
-each sub-issue gets its own section for its piece.
-
-## 6. Hand over to a human
-
-For each groomed issue:
-- Swap the label `needs-grooming` → `agent-groomed`. Create `agent-groomed` or `needs-info` once if
-  missing, with the color and description from the label table in the `workflow-setup` skill (Phase 4).
-- Post one short comment starting with `<!-- groom:done -->`:
-  "Groomed. Size M. Changed: <size or breakdown changes, or 'nothing'>. Review it, then add
-  `agent-ready` (or groom it further yourself first)."
-
-Never mention cost, tokens or spend in anything posted to GitHub (issues, PRs, comments). When numbers help, use result metrics instead: checks run and their time, fix attempts, review loops, files changed, sub-issues.
+## 6. Hand off (zero-noise)
+Add `agent-groomed` and remove both `needs-grooming` and `needs-info`.
+- **If size or sub-issues changed**: post 1 comment (`<!-- groom:done -->`): `Size/breakdown updated: <1-line diff>. Ready for review → agent-ready.`
+- **If nothing structural changed**: post **no comment** (the updated body + `agent-groomed` label are enough).
 
 ## 7. Report
-
-One line per issue: number, outcome (`agent-groomed`, `needs-info`, skipped), size, changes.
+1 line per issue: `#<n> → <agent-groomed | needs-info | skipped> (<size>, <changes or none>)`.

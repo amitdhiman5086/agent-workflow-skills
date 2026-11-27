@@ -1,131 +1,73 @@
 ---
 name: size
-description: Rate a GitHub issue S, M or L from estimated effort and files touched, label it, and automatically split L issues into ordered native GitHub sub-issues (each S or M, at most 6). Second step of the team workflow (capture → size → groom → agent); runs automatically after /capture and hands issues to the Groom routine with the needs-grooming label. Use for /size <issue>, "size this issue", "break this issue down".
-argument-hint: <issue number or link>
+description: Rate a GitHub issue S, M or L from effort and files touched, label it, and split L issues into up to 6 ordered vertical-slice sub-issues. Runs automatically after capture and hands off with needs-grooming. Use for /size <issue>, "size this issue", "break this issue down".
+argument-hint: "<issue number or link>"
 ---
 
 # Size
 
-## Writing rules
+Follow `../../references/rules.md` when present: terse bullets only, comments 1–2 lines, max 1-line narration between tool calls, and **never mention cost, tokens, or spend on GitHub**.
 
-Apply to every issue, comment, PR body, review and report this skill writes.
+Runs **unattended** (labels and creates sub-issues without asking, guarded by the rules below).
 
-- Write to the point: facts, decisions, next step. No greetings, filler, hedging, recaps or praise.
-- Short sentences. Bullets over paragraphs. One idea per bullet.
-- Leave out empty sections and anything the reader already sees in the issue, diff or labels.
-- Keep exact names: files, labels, commands, error text.
-- Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
+Input: `$ARGUMENTS` (issue numbers or links).
 
-Rate an issue S, M or L, and split L issues into sub-issues. This skill runs **without asking**:
-it labels and creates sub-issues on its own, then reports what it did. The guardrails below keep
-that safe.
-
-Input: $ARGUMENTS — one or more issue numbers or links. When called from `/capture`, size each
-issue it just created.
-
-## 1. Read the issue
-
-```
+## 1. Read & guard
+```bash
 gh repo view --json nameWithOwner
-gh issue view <n> --json number,title,body,labels,url
+gh issue view <n> --json number,title,body,labels,state,url
 gh api repos/{owner}/{repo}/issues/<n>/sub_issues --jq 'length'
 ```
+Skip without changes when the issue is closed, or already has `size:S|M|L` or sub-issues (unless the user explicitly asked to re-size).
 
-**Skip and report, without changing anything,** when the issue:
-- already has a `size:S`, `size:M` or `size:L` label, or already has sub-issues (sized before),
-  unless the user explicitly asked to re-size it;
-- is closed.
-
-## 2. Estimate (medium research)
-
-Read enough code to answer three questions. Do not plan the fix; that is `/groom`'s job.
-
-1. Which files will change or be added? Count them.
-2. Which areas does it touch? (UI, server/actions, database/migrations, blocks/templates,
-   tests, previews/assets)
-3. How long for one developer working with an agent?
+## 2. Estimate (targeted scan only)
+Locate likely touched files and layers without designing the solution:
 
 | Size | Effort | Files | Typical |
 |---|---|---|---|
-| **S** | under 2 hours | 1–3 | One component, a style fix, a copy change |
-| **M** | up to 1 day | under 10 | One feature in one or two areas |
-| **L** | more than 1 day | 10 or more | A new design or template port, a flow across UI + server + DB |
+| **S** | < 2 hours | 1–3 | Single component, bug fix, style/copy tweak |
+| **M** | ≤ 1 day | < 10 | Feature across 1–2 areas |
+| **L** | > 1 day | 10+ | Cross-stack UI + server + DB flow, or major template/module |
 
-**Go one size up** when the work includes a database migration, tenant-scoped data access, or
-requirements that are still unclear. When effort and file count disagree, use the larger size.
+**Bump one size up** for DB migrations, tenant-scoped access, or unclear requirements. When effort and file count disagree, pick the larger size.
 
-## 3. Label
-
-Make sure `needs-grooming`, `size:S`, `size:M` and `size:L` exist in the repo. Create any that are
-missing, once, with the color and description from the label table in the `workflow-setup` skill (Phase 4).
-
-Then on the issue: add `size:<X>` and `needs-grooming`, remove `captured`. The parent of an L
-issue gets them too: Groom checks the whole breakdown.
-
-Append a short section to the issue body (keep everything already there):
+## 3. Label & stamp
+Ensure `needs-grooming`, `size:S`, `size:M`, `size:L` exist (colors/descriptions in `manifest.json`). Add `size:<X>` + `needs-grooming`, remove `captured`, and append **one compact line** to the issue body:
 
 ```markdown
-## Size: M
-About half a day. Touches ~5 files in `blocks/templates/hero/` and `public/assets/`.
+<!-- size -->
+**Size: M** — ~5 files in `path/a/` and `path/b/`.
 ```
 
-## 4. Split L issues into sub-issues
+## 4. Split `L` into sub-issues (max 6)
+Rules for every sub-issue:
+- Rated `S` or `M`, independently buildable and mergeable with tests included.
+- **Vertical slices** (thin end-to-end path across needed layers; never one per layer), except wide mechanical renames (add beside old → migrate callers in batches → remove old).
+- Order: prep refactor first, then dependencies, then riskiest slice first.
+- **Over 6 slices (`XL`)**: create **none**. Swap `needs-grooming` → `needs-info` and post a 2-line `<!-- groom:question -->` comment recommending `/wayfinder #<n>` or splitting into 2+ parent issues with your suggested grouping.
 
-Only for L. Plan the pieces first, then check the rules, then create.
-
-**Rules for each sub-issue**
-- S or M on its own. If a piece is still L, split it further.
-- Mergeable alone: the app builds and tests pass after it, in order.
-- **Vertical slices.** Each sub-issue delivers one thin piece that works end to end (data,
-  server and UI together, as far as that piece needs) and can be shown or checked on its own.
-  Never one sub-issue per layer.
-- Order: a preparing refactor first, then by dependency; among independent pieces, the riskiest
-  first.
-- A wide mechanical change (a rename or retype across many files) is the exception: first add
-  the new form beside the old, then move callers over in batches (one sub-issue each), then
-  delete the old form.
-- Tests belong with the code they test. No separate "write tests" or "cleanup" sub-issue.
-- **At most 6.** If the work needs more, do not create any. Keep the issue as `size:L`, and
-  comment that it should become two or more parent issues, with your suggested grouping.
-  That case needs a human.
-
-**Create them in order** (native sub-issue order is creation order):
-
-```
+Create in order and attach natively:
+```bash
 gh issue create --title "<title>" --body-file <file> --label needs-grooming --label size:<S|M>
 id=$(gh api repos/{owner}/{repo}/issues/<new> --jq .id)
 gh api -X POST repos/{owner}/{repo}/issues/<parent>/sub_issues -F sub_issue_id=$id
 ```
 
-Sub-issue body:
-
+Sub-issue body (<60 words):
 ```markdown
-Part of #<parent>.
+Part of #<parent>. Depends on: #<prev | nothing>.
 
 ## What
-The one piece this sub-issue delivers.
-
-## Depends on
-#<earlier sub-issue>, or "nothing".
+<1–2 sentences on the vertical slice>
 
 ## Main files
 - `path/to/file.ts`
 
-## Size: S
-One line of reasoning.
+<!-- size -->
+**Size: S** — <short reason>.
 ```
 
-Then append to the parent body:
-
-```markdown
-## Breakdown
-1. #<a> <title> (S)
-2. #<b> <title> (M)
-```
-
-Never mention cost, tokens or spend in anything posted to GitHub (issues, PRs, comments). When numbers help, use result metrics instead: checks run and their time, fix attempts, review loops, files changed, sub-issues.
+Append `## Breakdown` (`1. #<a> <title> (S)`) to the parent body.
 
 ## 5. Report
-
-One line per issue: number, size, one-line reason. For L issues, list the sub-issues created
-in order. Next: the Groom routine picks them up on its next run (or run `/groom <number>`).
+1 line per issue (`#<n> size:<X> — <reason>`, plus ordered sub-issues for `L`).
