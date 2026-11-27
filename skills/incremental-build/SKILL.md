@@ -1,114 +1,46 @@
 ---
 name: incremental-build
-description: Build a change in thin, verified slices. First a deep plan in its own sub-session on the strongest model (Opus, xhigh effort) that splits the work into vertical slices, riskiest first. Then, for each slice, write the named failing test first, build, run typecheck and the related tests, and commit before starting the next. Keeps comments rare and lists what it noticed but did not change. Used by the runner for its plan and code phases; also by hand. Use for /incremental-build <issue or task>, "build this step by step", "small commits".
-argument-hint: <issue number or task>
+description: Build a GitHub issue or task with minimal context waste. Uses a surgical fast-path for small changes and bugs, or a deep vertical-slice plan for M/L features with test-first commits and strict scope. Use for /incremental-build <issue or task>, "build step by step".
+argument-hint: "<issue number or task>"
 ---
 
 # Incremental build
 
-Based on Addy Osmani's `incremental-implementation`, pstack's
-`principle-sequence-verifiable-units` and Matt Pocock's `tdd` (all MIT).
+Based on Addy Osmani's `incremental-implementation`, pstack's `principle-sequence-verifiable-units`, Matt Pocock's `tdd`, and `obra/superpowers` execution rules (MIT). Follow `../../references/rules.md` when present: max 1-line narration between tool calls, and **never mention cost, tokens, or spend on GitHub**.
 
-## Writing rules
+## 1. Load Context Pack (do not re-search the repo cold)
+- Ensure `.agents/artifacts/` is in `.git/info/exclude`, and create `.agents/artifacts/<branch-slug>/`.
+- Read the issue body, `<!-- groom:start -->` section (`Done when`, `Where to look`, `Tests`, `Out of scope`, `Agent hints`), and `AGENTS.md` (fallback `CLAUDE.md`, `GEMINI.md`).
+- Open the exact files cited in `Where to look` first. Only run a repository search when `Where to look` is absent or incomplete (prefer a `fast` read-only explorer returning `path:line` only).
 
-Apply to every issue, comment, PR body, review and report this skill writes.
+## 2. Choose execution path
 
-- Write to the point: facts, decisions, next step. No greetings, filler, hedging, recaps or praise.
-- Short sentences. Bullets over paragraphs. One idea per bullet.
-- Leave out empty sections and anything the reader already sees in the issue, diff or labels.
-- Keep exact names: files, labels, commands, error text.
-- Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
+### Path A: Surgical / Bug Fast-Path (`plan none`, or standalone non-high-risk `size:S` / single-root-cause `Type: bug` when `route` was not run)
+Skip slice planning overhead and execute in 1 slice:
+1. **Reproduce** (for bugs): run the failing test, script, or trace the exact failing mechanism.
+2. **Test first**: when `Tests` specifies a case, add the regression test and confirm it fails for the expected reason.
+3. **Patch narrowest layer**: fix or build at the responsible boundary without drive-by edits.
+4. **Verify & commit**: run typecheck + related tests, then commit once.
 
-Plan deeply once, then build in small steps that each end green and committed. A break is then
-caught in the slice that caused it, and every commit can be reviewed or reverted on its own.
+### Path B: Sliced Build (`plan deep` on `M` / `L` / parent with sub-issues)
+1. **Plan once (`deep` tier, read-only)**: write `.agents/artifacts/<branch-slug>/plan.md` with thin vertical slices (<100 lines each; prep refactor first, then riskiest slice first; wide renames split as add-beside → migrate callers → remove old):
+   ```markdown
+   Goal: <1 line>
+   1. <slice title> — files: `path/a.ts` · test: <named case | none> · check: <cmd> · commit: `<msg>`
+   ```
+2. **Build slice by slice (`code` tier)**:
+   - Write named failing test first (public interface only) → implement only this slice → run typecheck + slice tests → commit.
+   - If a slice disproves the plan, update remaining slices in `plan.md` and continue (never restart from zero).
+   - For a parent issue, build sub-issues in order on one branch and run targeted slice checks after each sub-issue (full checks run once at Finish).
 
-Input: $ARGUMENTS. An issue: read its body and the groomed section ("Done when", "Where to
-look", "Tests", "Out of scope", "Agent hints"). A task: the user's description.
+## 3. Strict coding discipline (prevents `deslop` & review loops)
+- **Scope**: touch only what `Done when` requires. No drive-by refactors or extra features.
+- **Zero slop at write time**: no comments that restate code, no banners, no `console.log`/debug prints, no `any`/`as unknown as` type-silencing casts. Add a 1-line comment only for non-obvious external constraints or issue-linked workarounds.
+- **Rulings, not stalls**: resolve minor technical ambiguities yourself and append `Ruling: <choice> — <why>` to `.agents/artifacts/<branch-slug>/plan.md`. Stop only for destructive actions, missing secrets, or a broken spec.
+- Remove temporary files outside `.agents/artifacts/`.
 
-**Checks:** the ones the runner passes in; otherwise the `## Runner` section of the local
-settings file `~/.config/agent-workflow/<owner>/<repo>.md`; otherwise propose them from
-`package.json` scripts and `CLAUDE.md`.
+## 4. Finish
+- **Inside `runner`**: stop after slice checks pass (`runner` runs `deslop` and the single full check pass next).
+- **Standalone by hand**: run full checks once (install, typecheck, tests, lint).
 
-## 1. Plan (deep thinking)
-
-Skip the plan only when the route says `plan none` (a clear S issue). The whole change is then
-one slice.
-
-Run the plan in its own sub-session on the strongest model at extra-high effort (Claude Code:
-the agent tool with `model: opus` and `effort: xhigh`). In another tool, use its strongest
-reasoning model at its highest effort. The planner reads the issue, `CLAUDE.md` and the code. It
-changes nothing.
-
-```markdown
-## Plan
-Goal: <one line>
-Risks: <what can go wrong; the project rules that apply>
-
-1. <slice title>: <what works after this slice>
-   Files: `path/a.ts`, `path/b.tsx`
-   Test first: <a case from the issue's "Tests" section, or "none">
-   Check: <typecheck + which tests, or what to look at>
-   Commit: <commit message>
-2. …
-```
-
-Slicing rules:
-- **Vertical.** Each slice is a thin path through every layer it needs (data, server, UI) and
-  works on its own. Never one layer per slice.
-- **Riskiest first.** The slice most likely to prove the approach wrong goes first.
-- **Small.** One logical change per slice, a commit's worth. Aim for under ~100 changed lines.
-- **Prepare first.** When a small refactor with no behavior change makes the work easier, it is
-  slice 1.
-- **Wide mechanical changes** (a rename across many files): add the new form beside the old,
-  move callers over in batches, then delete the old form. Each step is its own slice.
-- **Simplest thing that works.** No abstractions, options or hooks the issue does not ask for.
-
-## 2. Build, one slice at a time
-
-The build runs on the route's `code` model (in the runner) or on the session's model (by hand).
-For each slice, in order:
-
-1. **Test first**, when the slice names a test case: write the test, run it, and see it fail for
-   the reason you expect. Test behavior through the public interface, never internals.
-2. **Build** only what this slice needs.
-3. **Check:** run typecheck and the tests related to this slice. Fix before moving on. Never
-   skip, weaken or delete a test to make it pass.
-4. **Commit** the slice with its planned message.
-5. **Next slice.** When a slice shows the plan is wrong, change the remaining slices and note it
-   in the report. Never start over.
-
-While building:
-- **Scope.** Change only what the issue asks. No clean-ups, renames or upgrades next to the
-  change. Note them under "Noticed, not changed" instead.
-- **Comments.** Add a comment only where the code cannot explain itself (a reason, an outside
-  constraint, a workaround with its issue link). Keep it short and easy to understand. No
-  comments that repeat the code, no banners, no commented-out code.
-- **Stay green.** After every slice the project builds and the existing tests pass.
-- Delete any temporary files you made.
-
-**Parent with sub-issues:** plan all sub-issues in order on one branch; each sub-issue is one or
-more slices. Run the full checks after each sub-issue.
-
-**Feedback on a PR** (an `/agent-…` command): plan only the requested change, usually one slice.
-
-## 3. Finish
-
-Run the full checks once, in order (install, typecheck, tests, lint). In the runner, a failure
-here counts as a fix attempt.
-
-Report:
-
-```markdown
-## Build
-Slices: 3 of 3 committed
-1. `abc1234` <commit message>
-2. …
-Plan changes: <what changed and why>
-
-## Noticed, not changed
-- `path/file.ts`: <what, and why it is out of scope>
-```
-
-Leave out empty parts. The runner puts "Noticed, not changed" into the PR body.
-
-Never mention cost, tokens or spend in anything posted to GitHub (issues, PRs, comments). When numbers help, use result metrics instead: checks run and their time, fix attempts, review loops, files changed, sub-issues.
+Return a compact summary (<60 words): commits made, 1–3 bullets or a tiny structural `diff` sketch for the PR body, and any `Ruling:` lines.

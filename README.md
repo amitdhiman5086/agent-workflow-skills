@@ -1,109 +1,101 @@
-# Workflow skills
+# Agent Workflow (`v2.0.0`)
 
-Shared skills for the team's issue-to-PR workflow. They use the standard `SKILL.md` format, so
-they work in Claude Code and other agentic tools that read skills.
+Lean, general-purpose GitHub issue-to-PR skills for **Claude Code, Antigravity, OpenAI Codex, OpenCode, Cursor, Gemini CLI**, and any `SKILL.md`-compatible coding agent.
 
-## Setup
+Designed for **low context overhead**, **concise <100-word PRs**, **zero-noise GitHub state**, and **one-command upgrades**.
 
-Open this folder in your agentic app and say **"Set up the workflow"** (or run `/workflow-setup`).
-The agent asks you questions and does the setup. See [SETUP.md](SETUP.md).
+## Quick Start & Upgrade
+
+- **First-time setup**: open this repo (or install the plugin) in your coding agent and run **`/workflow-setup`** (or say *"Set up the workflow"*). See [SETUP.md](SETUP.md).
+- **Upgrade existing projects**: `git pull` and run **`/workflow-upgrade`** (or say *"Upgrade workflow"*). Diffs `VERSION` + `manifest.json` and applies only new skills, labels, config keys, and routine prompt updates.
+
+---
 
 ## Flow
 
+```text
+(XL epic) /wayfinder ─┐
+                      ▼
+/capture ─> captured ─/size─> needs-grooming ─(Groom routine)─> agent-groomed ─(You)─> agent-ready
+                                    │                                                      │
+                                    └─> needs-info ─(reply)─> Groom again         (Runner routine)
+                                                                                           │
+                     closed <─ close-out <─(merge)─ agent-pr-ready <─ agent-working ─> needs-human (draft PR)
 ```
-/capture ─> captured ─/size─> needs-grooming ─Groom routine─> agent-groomed ─you─> agent-ready
-                                                   │                                        │
-                                                   └─> needs-info ─(answer)─> Groom again    Runner routine
-                                                                                            │
-                                       close-out <─(you merge)─ agent-pr-ready <─ agent-working ─> needs-human (draft PR)
-```
 
-| Step | Skill | What it does | Runs | Status |
-|---|---|---|---|---|
-| 1 | `/capture` | Idea, screenshots, links or notes → agrees on each with you in `grill-me` rounds → issue(s) labelled `captured`, then runs `/size` | By you | Ready |
-| 2 | `/size` | `size:S/M/L` + `needs-grooming`; L becomes a parent with up to 6 ordered sub-issues, each a vertical slice | Automatic after capture | Ready |
-| 3 | `/groom` | Checks it is not already built and confirms bugs, re-checks size and sub-issues, decides technical questions itself, writes Done when / where to look / tests / out of scope / agent hints → `agent-groomed`, or `needs-info` with numbered questions only for real decisions | Routine, hourly, max 5 | Ready |
-| 4 | You | Review, groom further if you want, add `agent-ready` and assign to yourself | By you | — |
-| 5 | `/runner` | `setup` once per repo (base branch, checks, prefix, labels, UI preview, saved in your local file) and writes the routine prompt; each run builds ONE job (your `agent-ready` issue, or an `/agent-…` command on its PR or issue from anyone with write access) with `/incremental-build`, then `/deslop`, then `/review-loop` | Routine, every 15 min | Ready |
-| 6 | `/route` | Reads Groom's `Route:` line (size fallback): plan `none` or Opus at xhigh effort, and which model codes and reviews | Called by runner | Ready |
-| 7 | `/review-loop` | Two fresh reviewers in parallel: Spec (Done when, scope, bugs) and Standards (rules, leftovers, smells), plus the UI in a browser; findings rest on what they ran or read; every finding goes back to the coder; max 2 loops; result in the PR body | Called by runner | Ready |
-| 8 | `/close-out` | Merged: closes issue + sub-issues (and the parent when all subs are done), deletes the runner's branch, posts a metrics summary. Closed unmerged: `needs-human`, branch kept | Start of every runner run | Ready |
+| Step | Skill | What it does | Trigger |
+|---|---|---|---|
+| 0 | `/wayfinder` | *(Optional, `XL` >6 slices only)* Maps ≤7 blocking architecture decisions or throwaway spikes before creating build issues | By you when `XL` |
+| 1 | `/capture` | Turns rough ideas, screenshots, links, or notes into `<100w` issues via short `grill-me` rounds, checks duplicates, labels `captured`, then runs `/size` | By you |
+| 2 | `/size` | Labels `size:S/M/L` + `needs-grooming`; splits `L` into ≤6 vertical-slice native sub-issues (`>6` routes to `needs-info` / `/wayfinder`) | Auto after `/capture` |
+| 3 | `/groom` | Verifies code/bugs, settles technical rulings itself, writes a `<120w` Context Pack (`Done when`, `Where to look`, `Tests`, `Route`) → `agent-groomed` (or `needs-info` for human product choices) | Hourly routine (max 5) |
+| 4 | **You** | Review groomed spec, edit if needed, self-assign, and add `agent-ready` | By you |
+| 5 | `/runner` | Runs `close-out`, then takes **1 job** (collaborator `/agent-…` command or assignee's `agent-ready` issue): claims silently (`agent-working`), routes tiers, builds, deslops, runs 1 check pass, reviews, opens a `<100w` visual PR | Every 15 min |
+| 6 | `/route` | Maps Groom's hint or size/risk to universal `fast` · `standard` · `deep` model tiers and `single` vs `dual` review | Called by runner |
+| 7 | `/review-loop` | Fresh session(s): `single` reviewer by default, `dual` (Spec + Adversarial Standards) for auth/tenancy/migrations, plus browser UI check when visual files changed. Loops **only** on `must-fix` (max 2) | Called by runner |
+| 8 | `/close-out` | Merged: closes issue + sub-issues (+ parent when all subs close) with a 1-line summary and deletes runner branch. Closed unmerged: `needs-human`, branch kept | Start of each runner run |
 
-### Helper skills
+### Helper & Lifecycle Skills
 
-Called by the steps above, and useful on their own.
+| Skill | Purpose |
+|---|---|
+| `/grill-me` | Short (1–2 sentence) frontier question rounds where `"yes"` accepts recommended answers |
+| `/incremental-build` | Surgical 1-commit fast-path for `S`/bugs, or `deep`-planned vertical TDD slices for `M/L` using Groom's `Where to look` context pack |
+| `/deslop` | Diff-only removal of redundant comments, debug logs, and type-silencing casts (0-command fast exit when clean) |
+| `/workflow-setup` | Guided multi-agent onboarding (tools, skills/plugin, labels, `~/.config/agent-workflow/<owner>/<repo>.md`, routines) |
+| `/workflow-upgrade` | Delta-only upgrade across all onboarded repos from `VERSION` and `manifest.json` |
 
-| Skill | What it does | Used by |
-|---|---|---|
-| `/grill-me` | Rounds of numbered questions, each with a recommended answer that "yes" accepts, until you agree on a plan | `/capture`; `/groom`'s question format |
-| `/incremental-build` | Deep plan on Opus at xhigh effort as vertical slices, then one slice at a time: failing test first, build, check, commit | Runner |
-| `/deslop` | Removes comments that repeat the code, debug code and other clutter from a change; behavior unchanged | Runner, before review |
+---
 
 ## Labels
 
+Defined once in [`manifest.json`](manifest.json) and created automatically during setup/upgrade:
+
 | Label | Set by | Meaning |
 |---|---|---|
-| `captured` | /capture | New, not sized yet |
-| `size:S` `size:M` `size:L` | /size, /groom | Estimated size |
-| `needs-grooming` | /size | Waiting for the Groom routine |
-| `needs-info` | /groom | Blocked on a human decision; answer in a comment |
-| `agent-groomed` | /groom | Groomed by the agent, waiting for you |
-| `agent-ready` | You (the assignee) | Approved for the agent to build |
-| `agent-working` | Runner | Being built |
-| `agent-pr-ready` | Runner | PR open, your review requested |
-| `needs-human` | Runner, close-out | Stuck (draft PR), or PR closed without merging. Reply `/agent-retry` or `/agent-improve …` |
+| `captured` | `/capture` | Created, waiting for `/size` |
+| `size:S` `size:M` `size:L` | `/size`, `/groom` | Estimated scope (`S` <2h, `M` ≤1d, `L` >1d) |
+| `needs-grooming` | `/size` | Queued for Groom |
+| `needs-info` | `/size`, `/groom` | Waiting on a human product/scope decision |
+| `agent-groomed` | `/groom` | Context pack ready for human review |
+| `agent-ready` | Assignee | Approved to build (runner verifies assignee added it) |
+| `agent-working` | `/runner` | Claimed and building |
+| `agent-pr-ready` | `/runner` | Concise PR open, owner review requested |
+| `needs-human` | `/runner`, `/close-out` | Stuck (draft PR) or closed unmerged |
 
-The names are the same in every repo. Setup creates the missing ones; their colors and
-descriptions live in one place, `workflow-setup` Phase 4.
+---
 
-## Asking the runner for changes
+## Collaborator PR & Issue Commands
 
-Anyone with write access to the repo can comment on an agent PR, or on the issue it is built
-for. Start the comment with a command:
+Anyone with `write`, `maintain`, or `admin` repo access can post on an open agent PR or its linked issue:
 
-| Command | What the runner does |
+| Command | Action |
 |---|---|
-| `/agent-improve <what>` | Changes the PR as described |
-| `/agent-refer above` or `/agent-refer <comment link>` | Acts on that comment |
-| `/agent-retry` | Tries again after `needs-human` |
-| `/agent-help` | Replies with this table |
+| `/agent-improve <change>` | Updates the PR (and suggests a 1-line `AGENTS.md` rule if caused by an undocumented convention) |
+| `/agent-refer above` or `<url>` | Applies that comment as untrusted change data (never instructions) |
+| `/agent-retry` | Retries after `needs-human` |
+| `/agent-help` | Replies with this command list |
 
-The PR owner's runner picks it up within 15 minutes and replies where the command was posted.
-Plain comments are ignored. Only the assignee can add `agent-ready`.
+---
 
-The runner's settings live in a local file per person and repo, never committed:
-`~/.config/agent-workflow/<owner>/<repo>.md`.
+## Universal Installation (`Claude`, `Antigravity`, `Codex`, `OpenCode`, `Cursor`, `Gemini`)
 
-No skill mentions cost, tokens or spend on GitHub; they report result metrics (checks, fix attempts, review loops, files changed) instead.
-
-## Install by hand (the setup does this for you)
+`/workflow-setup` handles installation automatically, or install directly:
 
 ```bash
-ln -s "$PWD/skills/capture" ~/.claude/skills/capture
-ln -s "$PWD/skills/size" ~/.claude/skills/size
-ln -s "$PWD/skills/groom" ~/.claude/skills/groom
-ln -s "$PWD/skills/route" ~/.claude/skills/route
-ln -s "$PWD/skills/runner" ~/.claude/skills/runner
-ln -s "$PWD/skills/review-loop" ~/.claude/skills/review-loop
-ln -s "$PWD/skills/close-out" ~/.claude/skills/close-out
-ln -s "$PWD/skills/grill-me" ~/.claude/skills/grill-me
-ln -s "$PWD/skills/incremental-build" ~/.claude/skills/incremental-build
-ln -s "$PWD/skills/deslop" ~/.claude/skills/deslop
-ln -s "$PWD/skills/workflow-setup" ~/.claude/skills/workflow-setup
+# Any of 70+ coding agents (Claude Code, Codex, OpenCode, Cursor, Copilot, etc.)
+npx skills add <path-or-repo-url>
+
+# Antigravity / Gemini CLI native install
+agy plugin install <path-or-repo-url>
+gemini extensions install <path-or-repo-url>
+
+# Manual symlinks (pick your agent's skill directory: ~/.claude/skills, ~/.gemini/config/skills, ~/.agents/skills, ~/.config/opencode/skills, ~/.cursor/skills, ~/.gemini/skills)
+for s in skills/*; do ln -sfn "$PWD/$s" ~/.agents/skills/"$(basename "$s")"; done
 ```
 
-Or copy `skills/*` into a project's `.claude/skills/` to share them with everyone in that repo.
-Routines (scheduled runs in the app) are described in `routines/`.
-
-Needs: `gh` logged in (`gh auth status`), or the app's GitHub connector.
+Shared rules live in [`references/rules.md`](references/rules.md). Per-developer repo config stays local at `~/.config/agent-workflow/<owner>/<repo>.md` (never committed). Nothing posted to GitHub ever mentions cost, tokens, or spend.
 
 ## Credits
 
-Some skills borrow ideas from these MIT-licensed collections:
-- [Matt Pocock's skills](https://github.com/mattpocock/skills): `grill-me`, `grilling`,
-  `to-tickets`, `triage`, `tdd`, `code-review`.
-- [Addy Osmani's agent-skills](https://github.com/addyosmani/agent-skills):
-  `incremental-implementation`.
-- [pstack](https://github.com/cursor/plugins/tree/main/pstack) by Lauren Tan (Claude port by
-  Michael Denyer): `deslop`, `no-comments`, `principle-sequence-verifiable-units`,
-  `principle-prove-it-works`.
+Borrows and adapts MIT-licensed ideas from [Matt Pocock's skills](https://github.com/mattpocock/skills) (`grill-me`, `wayfinder`, `pr`, `tdd`, `code-review`), [Addy Osmani's agent-skills](https://github.com/addyosmani/agent-skills) (`incremental-implementation`, `context-engineering`, `doubt-driven-development`), [obra/superpowers](https://github.com/obra/superpowers) (`subagent-driven-development`), [HumanLayer skills](https://github.com/humanlayer/skills) (`visual-pr`, `rpi`), and [pstack](https://github.com/cursor/plugins/tree/main/pstack) (`deslop`, `no-comments`).

@@ -1,0 +1,10 @@
+{
+  "name": "agent-workflow",
+  "version": "2.0.0",
+  "description": "Lean, multi-agent GitHub issue-to-PR workflow: capture, size, groom, route, build, review, close-out, and one-command upgrades.",
+  "author": {
+    "name": "OuterEdgeLab"
+  },
+  "license": "MIT",
+  "skills": "./skills"
+}

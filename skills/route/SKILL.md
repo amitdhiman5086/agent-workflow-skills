@@ -1,71 +1,48 @@
 ---
 name: route
-description: Decide which model plans, codes and reviews a groomed GitHub issue, from the "Route" line Groom wrote in the issue's Agent hints, with a size-based fallback. Used by the runner before it starts building. Use for /route <issue>, "which model should build this".
-argument-hint: <issue number>
+description: Pick agent-agnostic model tiers (fast, standard, deep) and review depth (single vs dual) for planning, coding, and reviewing a GitHub issue from Groom's Route hint or size/type fallback. Works across Claude Code, Antigravity, Codex, OpenCode, Cursor, and Gemini CLI. Use for /route <issue>.
+argument-hint: "<issue number>"
 ---
 
 # Route
 
-## Writing rules
+Follow `../../references/rules.md` when present.
 
-Apply to every issue, comment, PR body, review and report this skill writes.
+Selects the model tier and review mode per phase from Groom's `<!-- groom:start -->` hints, with smart size/risk fallbacks.
 
-- Write to the point: facts, decisions, next step. No greetings, filler, hedging, recaps or praise.
-- Short sentences. Bullets over paragraphs. One idea per bullet.
-- Leave out empty sections and anything the reader already sees in the issue, diff or labels.
-- Keep exact names: files, labels, commands, error text.
-- Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
-
-Pick the model for each phase of building an issue. The decision comes from Groom (step 3), and a
-human may have edited it while grooming. Route only reads it and fills gaps.
-
-## 1. Read the Route line
-
-In the issue body, inside the `<!-- groom:start -->` section, under "Agent hints", find:
-
+## 1. Read Groom's hints
+In the issue's `## Agent hints`, look for:
+```text
+- Type: <bug | feature | refactor>
+- Route: plan <none|deep> · code <standard|deep> · review <single|dual> (<standard|deep>)
 ```
-- Route: plan <none|opus> · code <sonnet|opus> · review <sonnet|opus>
-```
+Legacy normalization: `opus` → `deep`, `sonnet` → `standard`, `plan sonnet` → `plan deep`, bare `review standard` → `review single (standard)`, bare `review deep` → `review dual (deep)`.
 
-Example: `- Route: plan opus · code sonnet · review sonnet`
+## 2. Fallback table (when `Route` or a field is missing)
 
-An older line that says `plan sonnet` means `plan opus`.
-
-## 2. Fill gaps from the size
-
-If the line is missing, or a phase is missing, use the issue's `size:*` label:
-
-| Size | plan | code | review |
+| Issue shape | `plan` | `code` | `review` |
 |---|---|---|---|
-| S | none | sonnet | sonnet |
-| M | opus | sonnet | sonnet |
-| L, or a parent with sub-issues | opus | sonnet | sonnet |
+| `size:S`, or single-root-cause `Type: bug` | `none` | `standard` | `single (standard)` |
+| `size:M` or `size:L` (normal feature/refactor) | `deep` | `standard` | `single (standard)` |
+| Any issue touching auth, security, tenancy, DB migrations, or public contracts | `deep` | `standard` (or `deep`) | `dual (deep)` |
 
-Review always runs, at high effort. No size label and no Route line: treat as M.
+Missing size and `Route`: treat as `size:M`.
 
-## 3. Map names to models
+## 3. Universal model tier mapping
+Use `Model map:` in `~/.config/agent-workflow/<owner>/<repo>.md` when configured; otherwise map to the running coding agent's native models:
 
-| Name | Model | Effort |
-|---|---|---|
-| sonnet | Claude Sonnet 5.5 (`claude-sonnet-5-5`) | high |
-| opus | Claude Opus 5.5 (`claude-opus-5-5`) | xhigh for plan, medium for code, high for review |
+| Tier | Role | Claude Code | Antigravity | Codex | OpenCode / Cursor / Gemini CLI |
+|---|---|---|---|---|---|
+| `fast` | Read-only file localization | Haiku | `flash` / `flash_lite` | Codex mini / fast | Fastest configured coding model |
+| `standard` | Coding, surgical patches, single review | Sonnet (high) | `inherit` / Pro | Codex / GPT-5 (medium-high) | Default coding model |
+| `deep` | Architecture plan (`xhigh`), complex code, adversarial `dual` review | Opus (`xhigh` plan / `high` review) | Highest reasoning model (`pro` / Carbon) | GPT-5 / o-series (`high` / `xhigh`) | Strongest reasoning model |
 
-In another tool, use its nearest equivalents: its strongest reasoning model for `opus`, its
-standard coding model for `sonnet`.
+## 4. Sub-session & inline execution rules
+- **Sub-agent capable hosts**: run `plan`, `code`, and `review` in isolated sub-sessions pinned to their routed tier so reviewers never inherit coding chat history.
+- **Single-session hosts** (or tools without per-subagent model switching): run phases sequentially on the session's active model, writing `.agents/artifacts/<branch>/plan.md` between phases to keep context clean.
 
-## 4. Output
-
-Return the plan in one line, and explain it in one sentence:
-
+## 5. Output
+1 line only:
+```text
+Route #<n> (<type>): plan <none|deep> · code <standard|deep> · review <single|dual> (<standard|deep>)
 ```
-Route #<n>: plan opus · code sonnet · review sonnet (from Groom's hints)
-```
-
-## How the runner applies it
-
-The plan and code phases run through the `incremental-build` skill: the plan in its own
-sub-session on Opus at xhigh effort, the build on the `code` model. Each phase runs in its own
-sub-session with its model, when the tool supports choosing a model per sub-agent (Claude Code:
-the agent tool's `model` and `effort` options). The review sub-session must start
-fresh, with no memory of the coding session. If the tool cannot choose models per sub-session,
-run every phase on the session's model and say so in the PR.

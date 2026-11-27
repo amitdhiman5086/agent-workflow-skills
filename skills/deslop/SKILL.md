@@ -1,72 +1,24 @@
 ---
 name: deslop
-description: Clean AI clutter from a change without changing its behavior. Removes comments that repeat the code, banners, commented-out code, debug output, unusual defensive checks, type-silencing casts, deep nesting and other patterns that do not match the file, and keeps the few comments that explain why. Run by the runner before review-loop; also by hand on any branch. Use for /deslop, "clean up the diff", "remove AI slop", "too many comments".
-argument-hint: "[base branch] (default: the runner's base branch, else the repo's default branch)"
+description: Fast diff-only cleanup that removes AI clutter (redundant comments, debug logs, type-silencing casts, unidiomatic guards) from touched lines without changing behavior. Exits immediately when clean. Use for /deslop, "clean up the diff".
+argument-hint: "[base branch]"
 ---
 
 # Deslop
 
-Based on pstack's `deslop` and `no-comments` skills (MIT).
+Based on pstack's `deslop` and `no-comments` skills (MIT). Follow `../../references/rules.md` when present.
 
-## Writing rules
+## 1. Diff-only fast gate
+Inspect `git diff <base>...HEAD` plus uncommitted changes (base: `$ARGUMENTS` → runner base branch → repo default branch). Touch **only** added or modified lines.
 
-Apply to every issue, comment, PR body, review and report this skill writes.
+**Fast exit**: if the diff adds no redundant comments, debug output, type-silencing casts, or unidiomatic guards, stop immediately and return `No slop (0 edits)` — run **no** extra commands.
 
-- Write to the point: facts, decisions, next step. No greetings, filler, hedging, recaps or praise.
-- Short sentences. Bullets over paragraphs. One idea per bullet.
-- Leave out empty sections and anything the reader already sees in the issue, diff or labels.
-- Keep exact names: files, labels, commands, error text.
-- Aim for: comments 1–3 lines, issue bodies under 150 words, PR bodies under 200 words. Go longer only when the work needs it.
+## 2. Strip clutter on touched lines
+- **Comments**: delete comments that repeat code, section banners, commented-out code, and change notes (`// added`, `// fixed`). Keep only license headers, public API docstrings, lint suppressions with reasons, and 1-sentence `why` comments for external constraints.
+- **Code**: delete `console.log`/`print`/`debugger`, unused imports/vars, redundant `try/catch` on trusted internal calls, deep nesting flattenable with early returns, and `any`/`as unknown as` casts (replace with real types, or flag if non-trivial).
 
-Tidy the change before anyone reviews it. Behavior never changes.
+## 3. Verify & finish
+- **Inside `runner`**: commit edits once as `chore: remove leftover comments and debug clutter` (`runner` runs the full check suite immediately after; if checks fail, revert the offending deslop hunk).
+- **Standalone by hand**: run typecheck + tests for touched files (undo any behavior-changing edit) and leave changes uncommitted.
 
-## 1. Scope
-
-The change from the base: `git diff <base>...HEAD` plus uncommitted changes (`git diff`, and new
-untracked files). Base: $ARGUMENTS, else the base branch in the runner's settings, else the
-repo's default branch. Touch only lines this change added or edited, never older code.
-
-## 2. Comments
-
-**The rule:** a comment stays only where the code cannot explain itself. A comment that stays is
-short and easy to understand.
-
-Remove:
-- Comments that repeat the code (`// increment the counter`, `// call the API`).
-- Banners and section dividers.
-- Commented-out code.
-- Notes about the change itself (`// new`, `// fixed X`, `// changed to use Y`) and vague TODOs.
-
-Keep, shortened to one plain sentence where possible:
-- Why a non-obvious choice was made: an outside constraint (library, platform, API, vendor), or
-  a workaround with its issue link.
-- License headers.
-- Doc comments on a public API.
-- A lint or type suppression with a short reason. Without a reason, flag it in the report.
-
-Follow the file: where the file has no comments of a kind, add none.
-
-## 3. Code clutter
-
-Remove when this change added it and it is unusual for the file:
-- Debug output (`console.log`, `print`, `debugger`).
-- Defensive checks or `try/catch` on trusted internal paths that the rest of the code does not
-  guard.
-- `any`, `as unknown as` and similar casts that only silence a type error. Use the right type;
-  when that needs a bigger change, flag it instead.
-- Deep nesting that early returns make flat.
-- Unused imports, variables and files.
-- Other patterns that differ from the code around them (naming, error handling, style).
-
-## 4. Check
-
-Run typecheck and the tests related to the touched files. A failure means an edit changed
-behavior: undo that edit.
-
-- In the runner: commit the result as one commit, `Remove leftover comments and debug code`.
-  No edits: no commit.
-- By hand: leave the changes uncommitted for the user to review.
-
-## 5. Report
-
-One line: files touched, comments removed, other edits, and flags left for the reviewer.
+Report 1 line: files cleaned and any flagged type suppressions.

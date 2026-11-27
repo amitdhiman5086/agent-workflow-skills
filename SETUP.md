@@ -1,24 +1,26 @@
-# Setup
+# Setup & Upgrades
 
-Your agent sets this up with you. It asks questions, checks your tools and does the steps.
+Works in **Claude Code, Antigravity, OpenAI Codex, OpenCode, Cursor, Gemini CLI**, and any `SKILL.md`-compatible agent.
 
-## For people
+## First-Time Setup (~5–10 min)
 
-Open this folder in your agentic app (Claude Code, Codex or similar) and say:
+Open this repository in your coding agent and say:
 
 > Set up the workflow.
 
-If the `workflow-setup` skill is already installed, you can also run `/workflow-setup` from any
-project.
+*(Or run `/workflow-setup` if already installed.)*
 
-It takes about 10 minutes and covers: tools, your role and repos, installing the skills, GitHub
-labels, runner settings, models, secrets for the cloud, the two routines, and an optional test run. You can run it again any time;
-it only fills what is missing.
+Setup detects your coding agent, installs the skills (native plugin, `npx skills`, personal symlinks, or in-repo `.agents/skills/`), creates missing GitHub labels from [`manifest.json`](manifest.json), writes your private config at `~/.config/agent-workflow/<owner>/<repo>.md` (never committed), and outputs your scheduled routine or CLI cron commands.
 
-Your runner settings are saved on your computer, one file per repo:
-`~/.config/agent-workflow/<owner>/<repo>.md`. Nothing is committed to the project.
+## Upgrading Existing Projects (~30 sec)
 
-## For agents
+Whenever this workflow repo gets new skills or improvements:
 
-Follow `skills/workflow-setup/SKILL.md` step by step. Ask the user before creating anything
-others can see, and never ask for or print secret values.
+1. Pull the latest changes (`git pull`).
+2. Say **"Upgrade workflow"** (or run `/workflow-upgrade`).
+
+`/workflow-upgrade` compares each project's `Workflow version` against [`VERSION`](VERSION) + [`manifest.json`](manifest.json) and applies **only the delta**: new/deprecated skills, missing labels, new config keys, and updated routine prompts.
+
+## For Agents
+
+Follow `skills/workflow-setup/SKILL.md` for onboarding and `skills/workflow-upgrade/SKILL.md` for upgrades. Confirm before creating anything visible to teammates, and never ask for or print secret values.
