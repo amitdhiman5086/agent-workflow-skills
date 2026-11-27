@@ -77,4 +77,12 @@ for f in files:
                 sys.exit(1)
 PY
 
-echo "OK: workflow v$VERSION_STR validated ($(echo "$MANIFEST_SKILLS" | wc -l | tr -d ' ') skills, $(jq '.labels | length' manifest.json) labels)."
+# 5. Verify SVG assets are valid XML and referenced README images exist
+for svg in assets/*.svg; do
+  xmllint --noout "$svg" || { echo "FAIL: invalid XML in $svg"; exit 1; }
+done
+for img in $(grep -oE 'assets/[a-zA-Z0-9._-]+\.svg' README.md | sort -u); do
+  [[ -f "$img" ]] || { echo "FAIL: README image $img missing"; exit 1; }
+done
+
+echo "OK: workflow v$VERSION_STR validated ($(echo "$MANIFEST_SKILLS" | wc -l | tr -d ' ') skills, $(jq '.labels | length' manifest.json) labels, $(ls -1 assets/*.svg | wc -l | tr -d ' ') SVGs)."

@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 320" width="960" height="320" role="img" aria-label="Groomed Issue Context Pack to Concise Visual PR Preview">
+  <defs>
+    <linearGradient id="prev-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <style>
+      .sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+      @keyframes checkPop {
+        0%, 20% { opacity: 0.25; }
+        35%, 90% { opacity: 1; }
+        100% { opacity: 0.25; }
+      }
+      @keyframes arrowPulse {
+        0%, 100% { transform: translateX(0px); opacity: 0.65; }
+        50% { transform: translateX(5px); opacity: 1; }
+      }
+      .chk-1 { animation: checkPop 5s infinite 0s; }
+      .chk-2 { animation: checkPop 5s infinite 0.9s; }
+      .chk-3 { animation: checkPop 5s infinite 1.8s; }
+      .mid-arrow { animation: arrowPulse 1.8s ease-in-out infinite; }
+      @media (prefers-reduced-motion: reduce) {
+        .chk-1, .chk-2, .chk-3, .mid-arrow { animation: none; opacity: 1; }
+      }
+    </style>
+  </defs>
+
+  <!-- Outer Container -->
+  <rect x="1" y="1" width="958" height="318" rx="16" fill="url(#prev-bg)" stroke="#30363d" stroke-width="1.5"/>
+
+  <!-- LEFT CARD: Groomed GitHub Issue -->
+  <g transform="translate(26, 24)">
+    <rect width="428" height="272" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+    <rect width="428" height="42" rx="12" fill="#1c2128"/>
+    <line x1="0" y1="42" x2="428" y2="42" stroke="#30363d"/>
+    <circle cx="20" cy="21" r="6" fill="none" stroke="#3fb950" stroke-width="2"/>
+    <circle cx="20" cy="21" r="2" fill="#3fb950"/>
+    <text x="33" y="25" class="sans" font-size="12.5" font-weight="700" fill="#f0f6fc">Issue #42 · Deduplicate session refresh</text>
+    <rect x="292" y="12" width="46" height="18" rx="9" fill="#238636" fill-opacity="0.25" stroke="#3fb950" stroke-width="0.8"/>
+    <text x="315" y="24.5" text-anchor="middle" class="mono" font-size="9.5" fill="#56d364">size:S</text>
+    <rect x="346" y="12" width="68" height="18" rx="9" fill="#1f6feb" fill-opacity="0.28" stroke="#58a6ff" stroke-width="0.8"/>
+    <text x="380" y="24.5" text-anchor="middle" class="mono" font-size="9.5" fill="#79c0ff">agent-ready</text>
+
+    <text x="18" y="66" class="mono" font-size="11" font-weight="700" fill="#58a6ff">## Done when  (&lt;120w Context Pack)</text>
+    <text x="18" y="86" class="mono" font-size="11.5" fill="#c9d1d9"><tspan fill="#3fb950" class="chk-1">[✓]</tspan> Concurrent 401s share one refresh promise</text>
+    <text x="18" y="105" class="mono" font-size="11.5" fill="#c9d1d9"><tspan fill="#3fb950" class="chk-2">[✓]</tspan> Clears inflight cache after settle</text>
+
+    <text x="18" y="135" class="mono" font-size="11" font-weight="700" fill="#58a6ff">## Where to look  (No cold repo re-scan)</text>
+    <rect x="18" y="144" width="392" height="44" rx="6" fill="#0d1117" stroke="#30363d"/>
+    <text x="28" y="162" class="mono" font-size="11" fill="#e6edf3">src/auth/refresh.ts:40-68 <tspan fill="#8b949e">(refreshSession)</tspan></text>
+    <text x="28" y="180" class="mono" font-size="11" fill="#8b949e">Pattern: src/api/dedupe.ts:12-29</text>
+
+    <text x="18" y="213" class="mono" font-size="11" font-weight="700" fill="#58a6ff">## Agent hints</text>
+    <text x="18" y="232" class="mono" font-size="11" fill="#c9d1d9">Type: <tspan fill="#79c0ff">bug</tspan> · Fast-path (1 slice)</text>
+    <text x="18" y="250" class="mono" font-size="11" fill="#c9d1d9">Route: <tspan fill="#a371f7">plan none · code standard · review single</tspan></text>
+  </g>
+
+  <!-- CENTER ANIMATED CONNECTOR (outer position group + inner animated group so CSS transform never resets x/y!) -->
+  <g transform="translate(464, 146)">
+    <g class="mid-arrow">
+      <path d="M 2 14 L 24 14 M 17 7 L 25 14 L 17 21" fill="none" stroke="#a371f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <!-- RIGHT CARD: Concise Visual PR (<100 words) -->
+  <g transform="translate(506, 24)">
+    <rect width="428" height="272" rx="12" fill="#161b22" stroke="#8957e5" stroke-width="1.3"/>
+    <rect width="428" height="42" rx="12" fill="#1c2128"/>
+    <line x1="0" y1="42" x2="428" y2="42" stroke="#30363d"/>
+    <circle cx="20" cy="16" r="3.5" fill="none" stroke="#a371f7" stroke-width="1.8"/>
+    <circle cx="20" cy="27" r="3.5" fill="none" stroke="#a371f7" stroke-width="1.8"/>
+    <line x1="20" y1="19.5" x2="20" y2="23.5" stroke="#a371f7" stroke-width="1.8"/>
+    <text x="34" y="25" class="sans" font-size="12.5" font-weight="700" fill="#f0f6fc">PR #45 · Concise Visual Output (&lt;100w)</text>
+    <rect x="330" y="12" width="86" height="18" rx="9" fill="#8957e5" fill-opacity="0.28" stroke="#a371f7" stroke-width="0.8"/>
+    <text x="373" y="24.5" text-anchor="middle" class="mono" font-size="9.5" fill="#d2a8ff">agent-pr-ready</text>
+
+    <text x="18" y="64" class="mono" font-size="11" font-weight="700" fill="#a371f7">## Why</text>
+    <text x="18" y="82" class="sans" font-size="12" fill="#c9d1d9">Prevent parallel 401 retries from revoking active sessions.</text>
+
+    <text x="18" y="106" class="mono" font-size="11" font-weight="700" fill="#a371f7">## Change</text>
+    <rect x="18" y="114" width="392" height="58" rx="6" fill="#0d1117" stroke="#30363d"/>
+    <rect x="19" y="120" width="390" height="20" fill="#f85149" fill-opacity="0.14"/>
+    <text x="26" y="134" class="mono" font-size="11" fill="#ff7b72">- return refreshSession(id);</text>
+    <rect x="19" y="142" width="390" height="24" fill="#2ea043" fill-opacity="0.16"/>
+    <text x="26" y="158" class="mono" font-size="11" fill="#56d364">+ return inflight.get(id) ?? trackRefresh(id);</text>
+
+    <text x="18" y="195" class="mono" font-size="11" font-weight="700" fill="#3fb950">## Proof &amp; Notes  (Zero review-log bloat)</text>
+    <text x="18" y="215" class="mono" font-size="11.5" fill="#c9d1d9"><tspan fill="#3fb950" class="chk-3">✔</tspan> Checks: npm run typecheck, 24 tests, lint passed</text>
+    <text x="18" y="235" class="mono" font-size="11.5" fill="#c9d1d9">• Risk: <tspan fill="#56d364">Two-way</tspan> (in-memory promise map only)</text>
+    <text x="18" y="255" class="sans" font-size="11" fill="#8b949e">Resolves #42 · Reviewer requested: @owner</text>
+  </g>
+</svg>
